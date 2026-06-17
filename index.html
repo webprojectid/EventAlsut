@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,7 +39,6 @@
                         'fade-in': 'fadeIn 0.4s ease forwards',
                         'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
                         'float': 'float 6s ease-in-out infinite',
-                        'shimmer': 'shimmer 2.5s ease-in-out infinite',
                         'slide-in': 'slideIn 0.4s ease forwards',
                         'scale-in': 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
                     },
@@ -48,7 +47,6 @@
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
                         pulseGlow: { '0%,100%': { boxShadow: '0 0 20px rgba(124,58,237,0.15)' }, '50%': { boxShadow: '0 0 40px rgba(124,58,237,0.3)' } },
                         float: { '0%,100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-8px)' } },
-                        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
                         slideIn: { '0%': { opacity: '0', transform: 'translateX(-12px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
                         scaleIn: { '0%': { opacity: '0', transform: 'scale(0.92)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
                     }
@@ -289,7 +287,6 @@
             animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        /* custom scroll for tables */
         .table-wrap::-webkit-scrollbar {
             height: 4px;
         }
@@ -312,7 +309,7 @@
             justify-content: center;
             font-size: 10px;
             font-weight: 600;
-            color: rgba(255,255,255,0.85);
+            color: rgba(255, 255, 255, 0.85);
             transition: all 0.2s ease;
             cursor: default;
             min-height: 32px;
@@ -320,11 +317,11 @@
         .heatmap-cell:hover {
             transform: scale(1.1);
             z-index: 2;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
         }
         .heatmap-cell-empty {
-            background: rgba(45,36,63,0.2);
-            border: 1px dashed rgba(45,36,63,0.3);
+            background: rgba(45, 36, 63, 0.2);
+            border: 1px dashed rgba(45, 36, 63, 0.3);
         }
         .heatmap-label {
             font-size: 9px;
@@ -345,6 +342,42 @@
             width: 16px;
             height: 16px;
             border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Minimalist interactive icons */
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(45, 36, 63, 0.3);
+            border: 1px solid rgba(45, 36, 63, 0.3);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            color: #8b8aa0;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .icon-btn:hover {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: #7c3aed;
+            color: #fff;
+            transform: scale(1.05);
+        }
+        .icon-btn.active {
+            background: rgba(124, 58, 237, 0.25);
+            border-color: #7c3aed;
+            color: #fff;
+        }
+
+        .icon-sm {
+            font-size: 14px;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -366,12 +399,12 @@
 
         <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
             <div id="login-error" class="hidden bg-red-900/30 border border-red-500/40 text-red-300 text-sm p-3 rounded-xl text-center font-medium">
-                Username atau password salah
+                Username or password is incorrect
             </div>
             <div>
                 <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Username</label>
                 <input type="text" id="username" required
-                class="w-full px-4 py-3.5 rounded-xl input-modern text-white font-medium placeholder:text-brand-muted/40" placeholder="Masukkan username" />
+                class="w-full px-4 py-3.5 rounded-xl input-modern text-white font-medium placeholder:text-brand-muted/40" placeholder="Enter username" />
             </div>
             <div>
                 <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Password</label>
@@ -380,7 +413,7 @@
             </div>
             <button type="submit"
             class="w-full py-3.5 mt-2 rounded-xl btn-primary text-white font-bold tracking-wide shadow-lg shadow-brand-primary/20 transition">
-            Masuk Sistem
+            Sign In
         </button>
     </form>
 </div>
@@ -395,8 +428,8 @@
             <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center font-extrabold text-white text-xs shadow-lg">AS</div>
             <h2 class="text-sm font-bold text-white">Alsut Logistics</h2>
         </div>
-        <button onclick="toggleMobileMenu()" class="text-brand-muted hover:text-white p-1.5 transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+        <button onclick="toggleMobileMenu()" class="icon-btn icon-sm" aria-label="Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
     </div>
 
@@ -422,28 +455,28 @@
     <div class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
         <button onclick="navigate('dashboard')" id="nav-dashboard"
         class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-white transition-all duration-200 active">
-        <span class="mr-3 text-lg">📊</span> Dashboard
+        <span class="mr-3 text-lg">≡</span> Dashboard
     </button>
     <button onclick="navigate('database')" id="nav-database"
     class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-white transition-all duration-200">
-    <span class="mr-3 text-lg">🗄️</span> Form &amp; Data
+    <span class="mr-3 text-lg">⊞</span> Data &amp; Form
 </button>
 <button onclick="navigate('active-loans')" id="nav-active-loans"
 class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-white transition-all duration-200">
-<span class="mr-3 text-lg">⚡</span> Tiket Aktif
+<span class="mr-3 text-lg">◉</span> Active Tickets
 </button>
 <button onclick="navigate('tools')" id="nav-tools"
 class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-white transition-all duration-200">
-<span class="mr-3 text-lg">🔍</span> Cari &amp; Export
+<span class="mr-3 text-lg">⌕</span> Search &amp; Export
 </button>
 <button onclick="navigate('history')" id="nav-history"
 class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-white transition-all duration-200">
-<span class="mr-3 text-lg">🕒</span> Riwayat
+<span class="mr-3 text-lg">↻</span> History
 </button>
 <div class="admin-only mt-3 pt-3 border-t border-brand-border/30">
     <button onclick="navigate('settings')" id="nav-settings"
     class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-white transition-all duration-200">
-    <span class="mr-3 text-lg">⚙️</span> User Settings
+    <span class="mr-3 text-lg">⚙</span> Settings
 </button>
 </div>
 </div>
@@ -452,7 +485,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
 <div class="p-4 border-t border-brand-border/40">
     <button onclick="handleLogout()"
     class="w-full flex items-center justify-center px-4 py-2.5 rounded-xl bg-red-900/20 hover:bg-red-900/40 border border-red-500/20 text-sm font-semibold text-red-300 transition-all duration-200 hover:border-red-500/40">
-    <span class="mr-2">⏻</span> Sign Out
+    <span class="mr-2">⤴</span> Sign Out
 </button>
 </div>
 </nav>
@@ -468,7 +501,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Executive Dashboard</h2>
-                    <p class="text-sm text-brand-muted mt-0.5">Analisis lengkap performa logistik event</p>
+                    <p class="text-sm text-brand-muted mt-0.5">Complete logistics performance analytics</p>
                 </div>
                 <span class="text-xs text-brand-muted bg-brand-surface px-3 py-1.5 rounded-full border border-brand-border/40">Live</span>
             </div>
@@ -476,7 +509,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             <!-- Stats: 5 Cards -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 <div class="stat-card glass rounded-2xl p-4 border border-brand-border/40 shadow-lg">
-                    <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Peminjaman</p>
+                    <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Loans</p>
                     <p class="text-2xl font-extrabold text-white" id="dash-total-loans">0</p>
                 </div>
                 <div class="stat-card glass rounded-2xl p-4 border border-cyan-500/30 shadow-lg shadow-cyan-500/5">
@@ -484,80 +517,80 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                     <p class="text-2xl font-extrabold text-cyan-400" id="dash-active-loans">0</p>
                 </div>
                 <div class="stat-card glass rounded-2xl p-4 border border-emerald-500/30 shadow-lg shadow-emerald-500/5">
-                    <p class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Selesai / Clear</p>
+                    <p class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Completed / Clear</p>
                     <p class="text-2xl font-extrabold text-emerald-400" id="dash-done-loans">0</p>
                 </div>
                 <div class="stat-card glass rounded-2xl p-4 border border-red-500/30 shadow-lg shadow-red-500/5">
-                    <p class="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1">Overdue (>7 hari)</p>
+                    <p class="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1">Overdue (>7 days)</p>
                     <p class="text-2xl font-extrabold text-red-400" id="dash-overdue-loans">0</p>
                 </div>
                 <div class="stat-card glass rounded-2xl p-4 border border-brand-border/40 shadow-lg">
-                    <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Item Unit</p>
+                    <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Item Units</p>
                     <p class="text-2xl font-extrabold text-white" id="dash-total-items">0</p>
                 </div>
             </div>
 
-            <!-- Charts Row 2: 3 Columns (Most Borrowed, Top Events, Status Distribution) -->
+            <!-- Charts Row 2: 3 Columns -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
-                    <h3 class="text-sm font-bold text-white mb-4">🏆 Top 10 Sering Dipinjam</h3>
+                    <h3 class="text-sm font-bold text-white mb-4">🏆 Top 10 Most Borrowed</h3>
                     <div class="relative h-56 w-full"><canvas id="chartTop10"></canvas></div>
                 </div>
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
-                    <h3 class="text-sm font-bold text-white mb-4">🎯 Top 5 Event (Total Item)</h3>
+                    <h3 class="text-sm font-bold text-white mb-4">🎯 Top 5 Events (Total Items)</h3>
                     <div class="relative h-56 w-full"><canvas id="chartTopEvents"></canvas></div>
                 </div>
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
-                    <h3 class="text-sm font-bold text-white mb-4">📊 Distribusi Status</h3>
+                    <h3 class="text-sm font-bold text-white mb-4">📊 Status Distribution</h3>
                     <div class="relative h-56 w-full"><canvas id="chartStatus"></canvas></div>
                 </div>
             </div>
 
-            <!-- Charts Row 3: 2 Columns (Least Borrowed, Monthly Trend) -->
+            <!-- Charts Row 3: 2 Columns -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
-                    <h3 class="text-sm font-bold text-white mb-4">📉 Top 10 Jarang Dipinjam</h3>
+                    <h3 class="text-sm font-bold text-white mb-4">📉 Top 10 Least Borrowed</h3>
                     <div class="relative h-64 w-full"><canvas id="chartBottom10"></canvas></div>
                 </div>
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
-                    <h3 class="text-sm font-bold text-white mb-4">📈 Tren Peminjaman Per Bulan</h3>
+                    <h3 class="text-sm font-bold text-white mb-4">📈 Monthly Loan Trend</h3>
                     <div class="relative h-64 w-full"><canvas id="chartTrend"></canvas></div>
                 </div>
             </div>
 
-            <!-- ===== HEATMAP KALENDER (PALING BAWAH) ===== -->
+            <!-- ===== HEATMAP (bottom) ===== -->
             <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-white flex items-center">
-                        <span class="mr-2">🔥</span> Heatmap Peminjaman (30 Hari Terakhir)
-                        <span class="ml-2 text-[10px] font-normal text-brand-muted">semakin gelap = semakin padat</span>
+                        <span class="mr-2">▦</span> Loan Heatmap (Last 30 Days)
+                        <span class="ml-2 text-[10px] font-normal text-brand-muted">darker = busier</span>
                     </h3>
                     <span class="text-xs text-brand-muted" id="heatmap-month"></span>
                 </div>
                 <div class="overflow-x-auto">
                     <div id="heatmap-container" class="min-w-[320px]">
-                        <!-- header hari -->
+                        <!-- header -->
                         <div class="heatmap-grid mb-1" id="heatmap-header">
-                            <div class="heatmap-label">Sen</div>
-                            <div class="heatmap-label">Sel</div>
-                            <div class="heatmap-label">Rab</div>
-                            <div class="heatmap-label">Kam</div>
-                            <div class="heatmap-label">Jum</div>
-                            <div class="heatmap-label">Sab</div>
-                            <div class="heatmap-label">Min</div>
+                            <div class="heatmap-label">Mon</div>
+                            <div class="heatmap-label">Tue</div>
+                            <div class="heatmap-label">Wed</div>
+                            <div class="heatmap-label">Thu</div>
+                            <div class="heatmap-label">Fri</div>
+                            <div class="heatmap-label">Sat</div>
+                            <div class="heatmap-label">Sun</div>
                         </div>
                         <!-- grid -->
                         <div id="heatmap-grid" class="heatmap-grid"></div>
                         <!-- legend -->
                         <div class="flex justify-end mt-3 heatmap-legend">
-                            <span>Rendah</span>
+                            <span>Low</span>
                             <span class="color-swatch" style="background:#2d243f;"></span>
                             <span class="color-swatch" style="background:#4f46e5;"></span>
                             <span class="color-swatch" style="background:#7c3aed;"></span>
                             <span class="color-swatch" style="background:#a78bfa;"></span>
                             <span class="color-swatch" style="background:#c084fc;"></span>
                             <span class="color-swatch" style="background:#f59e0b;"></span>
-                            <span>Tinggi</span>
+                            <span>High</span>
                         </div>
                     </div>
                 </div>
@@ -568,50 +601,50 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         <div id="view-database" class="hidden view-transition space-y-6">
             <div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Data &amp; Form Input</h2>
-                <p class="text-sm text-brand-muted mt-0.5">Kelola seluruh data peminjaman barang event</p>
+                <p class="text-sm text-brand-muted mt-0.5">Manage all loan records</p>
             </div>
 
             <div class="flex flex-col xl:flex-row gap-6">
                 <!-- Form -->
                 <div class="w-full xl:w-[420px] shrink-0 glass rounded-2xl p-6 border border-brand-border/40 shadow-lg admin-only">
                     <div class="flex items-center justify-between mb-5">
-                        <h3 class="text-md font-bold text-white" id="form-title">Input Peminjaman Baru</h3>
-                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-brand-muted hover:text-white px-3 py-1.5 rounded-lg bg-brand-bg border border-brand-border/40 transition">Batal Edit</button>
+                        <h3 class="text-md font-bold text-white" id="form-title">New Loan Entry</h3>
+                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-brand-muted hover:text-white px-3 py-1.5 rounded-lg bg-brand-bg border border-brand-border/40 transition">Cancel Edit</button>
                     </div>
                     <form id="loan-form" onsubmit="handleSubmitLoan(event)" class="space-y-4">
                         <input type="hidden" id="edit-id" value="" />
                         <div>
-                            <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">No Ticket</label>
+                            <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Ticket No.</label>
                             <input type="text" id="input-ticket" required class="w-full px-4 py-2.5 rounded-xl input-modern text-white font-medium" placeholder="e.g. 460674" />
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Tanggal</label>
+                                <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Date</label>
                                 <input type="date" id="input-date" required class="w-full px-4 py-2.5 rounded-xl input-modern text-white" />
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Status</label>
                                 <select id="input-status" class="w-full px-4 py-2.5 rounded-xl input-modern text-white">
-                                    <option value="Dipinjam">⚠️ Dipinjam</option>
-                                    <option value="Kembali">✅ Kembali</option>
+                                    <option value="Dipinjam">⚠️ Borrowed</option>
+                                    <option value="Kembali">✅ Returned</option>
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Nama Event</label>
-                            <input type="text" id="input-event" required class="w-full px-4 py-2.5 rounded-xl input-modern text-white font-medium" placeholder="Nama kegiatan" />
+                            <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1.5">Event Name</label>
+                            <input type="text" id="input-event" required class="w-full px-4 py-2.5 rounded-xl input-modern text-white font-medium" placeholder="Event name" />
                         </div>
                         <div class="pt-2 border-t border-brand-border/30">
                             <div class="flex justify-between items-center mb-2.5">
-                                <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider">Barang</label>
+                                <label class="block text-xs font-semibold text-brand-muted uppercase tracking-wider">Items</label>
                                 <button type="button" onclick="addFormItemRow()" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1">
-                                    <span class="text-base">+</span> Tambah
+                                    <span class="text-base">+</span> Add
                                 </button>
                             </div>
                             <div id="items-container" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar"></div>
                         </div>
                         <button type="submit" id="submit-btn" class="w-full py-3.5 mt-2 rounded-xl btn-primary text-white font-bold shadow-lg shadow-brand-primary/20 transition">
-                            Simpan Data
+                            Save Record
                         </button>
                     </form>
                 </div>
@@ -619,38 +652,38 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 <!-- Viewer guard -->
                 <div class="w-full xl:w-[420px] shrink-0 glass rounded-2xl p-6 border border-cyan-500/20 shadow-lg viewer-only flex-col items-center justify-center text-center hidden">
                     <span class="text-5xl mb-4 block opacity-60">🔒</span>
-                    <h3 class="text-lg font-bold text-white mb-2">Akses View-Only</h3>
-                    <p class="text-sm text-brand-muted leading-relaxed">Anda masuk sebagai Viewer. Panel penambahan data baru, pengeditan, atau penghapusan arsip terkunci.</p>
+                    <h3 class="text-lg font-bold text-white mb-2">View-Only Access</h3>
+                    <p class="text-sm text-brand-muted leading-relaxed">You are logged in as a Viewer. Adding, editing, or deleting records is restricted.</p>
                 </div>
 
                 <!-- Table -->
                 <div class="flex-1 glass rounded-2xl border border-brand-border/40 shadow-lg flex flex-col min-h-[500px] overflow-hidden">
                     <div class="p-4 border-b border-brand-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-brand-surface/30">
-                        <h3 class="text-md font-bold text-white">Database Rekapitulasi</h3>
-                        <input type="text" id="table-search" oninput="renderTableResetPage()" placeholder="Filter cepat ..." class="w-full sm:w-64 px-4 py-2.5 rounded-xl input-modern text-white text-sm" />
+                        <h3 class="text-md font-bold text-white">Database Summary</h3>
+                        <input type="text" id="table-search" oninput="renderTableResetPage()" placeholder="Quick filter ..." class="w-full sm:w-64 px-4 py-2.5 rounded-xl input-modern text-white text-sm" />
                     </div>
                     <div class="flex-1 overflow-auto table-wrap">
                         <table class="w-full text-left border-collapse min-w-[800px]">
                             <thead class="sticky top-0 bg-[#1b1729] z-10 border-b border-brand-border/40">
                                 <tr class="text-[10px] font-extrabold uppercase text-brand-muted tracking-wider">
-                                    <th class="py-4 px-5">Tgl</th>
+                                    <th class="py-4 px-5">Date</th>
                                     <th class="py-4 px-5">Ticket</th>
                                     <th class="py-4 px-5">Event</th>
-                                    <th class="py-4 px-5">Barang</th>
+                                    <th class="py-4 px-5">Items</th>
                                     <th class="py-4 px-5 text-center">Status</th>
-                                    <th class="py-4 px-5 text-right admin-only">Aksi</th>
+                                    <th class="py-4 px-5 text-right admin-only">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="loan-table-body" class="divide-y divide-brand-border/20 text-sm"></tbody>
                         </table>
                         <div id="empty-state" class="hidden flex flex-col items-center justify-center p-12 text-center text-brand-muted">
-                            <span class="text-5xl mb-4 opacity-40">📋</span>
-                            <p class="font-bold text-base">Tidak ada data ditemukan</p>
+                            <span class="text-5xl mb-4 opacity-40">⊘</span>
+                            <p class="font-bold text-base">No data found</p>
                         </div>
                     </div>
                     <!-- Pagination -->
                     <div class="p-4 border-t border-brand-border/40 bg-brand-surface/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold text-brand-muted">
-                        <div id="pagination-info">Menampilkan 0 data</div>
+                        <div id="pagination-info">Showing 0 entries</div>
                         <div class="flex space-x-2">
                             <button onclick="prevPage()" id="btn-prev" class="px-4 py-1.5 rounded-xl btn-outline text-brand-muted hover:text-white transition disabled:opacity-30 disabled:hover:text-brand-muted">Prev</button>
                             <button onclick="nextPage()" id="btn-next" class="px-4 py-1.5 rounded-xl btn-outline text-brand-muted hover:text-white transition disabled:opacity-30 disabled:hover:text-brand-muted">Next</button>
@@ -660,52 +693,52 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             </div>
         </div>
 
-        <!-- ===== VIEW: TIKET AKTIF ===== -->
+        <!-- ===== VIEW: ACTIVE TICKETS ===== -->
         <div id="view-active-loans" class="hidden view-transition space-y-6">
             <div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center">
-                    <span class="mr-3">⚡</span> Tiket Komplit / Peminjaman Belum Kembali
+                    <span class="mr-3">◉</span> Active Tickets / Outstanding Loans
                 </h2>
-                <p class="text-sm text-brand-muted mt-0.5">Daftar semua peminjaman yang masih berlangsung</p>
+                <p class="text-sm text-brand-muted mt-0.5">All currently borrowed items</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="active-loans-grid"></div>
             <div id="active-empty" class="hidden p-10 text-center text-brand-muted glass rounded-2xl border border-brand-border/40">
-                <span class="text-5xl block mb-3">🎉</span>
-                <p class="font-bold text-lg">Semua barang sudah aman di storage.</p>
-                <p class="text-sm mt-1">Tidak ada tiket outstanding.</p>
+                <span class="text-5xl block mb-3">✓</span>
+                <p class="font-bold text-lg">All items are safely back in storage.</p>
+                <p class="text-sm mt-1">No outstanding tickets.</p>
             </div>
         </div>
 
         <!-- ===== VIEW: TOOLS ===== -->
         <div id="view-tools" class="hidden view-transition space-y-6">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">🔍 Pencarian &amp; Ekspor Data</h2>
-                <p class="text-sm text-brand-muted mt-0.5">Cari detail tiket atau unduh data dalam format CSV</p>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">⌕ Search &amp; Export</h2>
+                <p class="text-sm text-brand-muted mt-0.5">Find ticket details or download data</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Lookup -->
                 <div class="glass rounded-2xl p-6 border border-brand-border/40 shadow-lg card-hover">
-                    <h3 class="text-lg font-bold text-cyan-400 mb-4 flex items-center"><span class="text-2xl mr-2">🔍</span> Cek Detail Ticket</h3>
-                    <p class="text-xs text-brand-muted mb-4">Masukkan nomor tiket spesifik untuk melihat rincian lengkap.</p>
+                    <h3 class="text-lg font-bold text-cyan-400 mb-4 flex items-center"><span class="text-2xl mr-2">⌕</span> Ticket Lookup</h3>
+                    <p class="text-xs text-brand-muted mb-4">Enter a specific ticket number to see full details.</p>
                     <div class="flex space-x-3 mb-6">
-                        <input type="text" id="lookup-input" placeholder="Contoh: 460674" class="flex-1 px-4 py-3 rounded-xl input-modern text-white font-bold" />
-                        <button onclick="lookupTicket()" class="px-6 py-3 rounded-xl btn-primary text-white font-bold shadow-lg shadow-brand-primary/20 transition">Cari</button>
+                        <input type="text" id="lookup-input" placeholder="e.g. 460674" class="flex-1 px-4 py-3 rounded-xl input-modern text-white font-bold" />
+                        <button onclick="lookupTicket()" class="px-6 py-3 rounded-xl btn-primary text-white font-bold shadow-lg shadow-brand-primary/20 transition">Search</button>
                     </div>
                     <div id="lookup-result" class="hidden bg-brand-bg/60 p-5 rounded-xl border border-cyan-500/20 space-y-4"></div>
                 </div>
 
                 <!-- Export -->
                 <div class="glass rounded-2xl p-6 border border-brand-border/40 shadow-lg card-hover">
-                    <h3 class="text-lg font-bold text-emerald-400 mb-4 flex items-center"><span class="text-2xl mr-2">📥</span> Ekspor Data CSV</h3>
-                    <p class="text-xs text-brand-muted mb-4">Unduh data peminjaman ke format CSV dengan filter tanggal.</p>
+                    <h3 class="text-lg font-bold text-emerald-400 mb-4 flex items-center"><span class="text-2xl mr-2">⬇</span> Export CSV</h3>
+                    <p class="text-xs text-brand-muted mb-4">Download loan data as CSV with date filter.</p>
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div>
-                            <label class="block text-xs font-semibold text-brand-muted mb-1.5">Dari Tanggal</label>
+                            <label class="block text-xs font-semibold text-brand-muted mb-1.5">From Date</label>
                             <input type="date" id="export-start" class="w-full px-3 py-2.5 rounded-xl input-modern text-white" />
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-brand-muted mb-1.5">Sampai Tanggal</label>
+                            <label class="block text-xs font-semibold text-brand-muted mb-1.5">To Date</label>
                             <input type="date" id="export-end" class="w-full px-3 py-2.5 rounded-xl input-modern text-white" />
                         </div>
                     </div>
@@ -714,13 +747,13 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
 
                 <!-- Import Excel -->
                 <div class="glass rounded-2xl p-6 border border-brand-border/40 shadow-lg card-hover md:col-span-2 admin-only">
-                    <h3 class="text-lg font-bold text-amber-400 mb-2 flex items-center"><span class="text-2xl mr-2">📤</span> Import Data Master (.xlsx)</h3>
+                    <h3 class="text-lg font-bold text-amber-400 mb-2 flex items-center"><span class="text-2xl mr-2">⊞</span> Import Master Data (.xlsx)</h3>
                     <p class="text-sm text-brand-muted mb-4 leading-relaxed">
-                        Upload file Excel (.xlsx) asli Anda. Sistem akan membaca <strong>semua sheet</strong> sekaligus dan menyinkronkan ke Google Sheets.
+                        Upload your original Excel (.xlsx) file. The system will read <strong>all sheets</strong> and sync to Google Sheets.
                     </p>
                     <div class="flex flex-col sm:flex-row items-center gap-4">
                         <input type="file" id="import-file" accept=".xlsx,.xls,.csv" class="block w-full text-sm text-brand-muted file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-brand-primary/20 file:text-white hover:file:bg-brand-primary/30 transition" />
-                        <button onclick="importExcel()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500/80 hover:bg-amber-500 text-white font-bold transition shadow-lg shadow-amber-500/20 whitespace-nowrap">Proses Import</button>
+                        <button onclick="importExcel()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500/80 hover:bg-amber-500 text-white font-bold transition shadow-lg shadow-amber-500/20 whitespace-nowrap">Import</button>
                     </div>
                     <div id="import-msg" class="text-xs font-bold text-emerald-400 mt-3 hidden"></div>
                 </div>
@@ -730,8 +763,8 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         <!-- ===== VIEW: HISTORY ===== -->
         <div id="view-history" class="hidden view-transition space-y-6">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">🕒 Riwayat Transaksi Terakhir</h2>
-                <p class="text-sm text-brand-muted mt-0.5">10 data terbaru yang masuk</p>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">↻ Recent Transaction History</h2>
+                <p class="text-sm text-brand-muted mt-0.5">Last 10 records added</p>
             </div>
             <div class="glass rounded-2xl border border-brand-border/40 shadow-lg p-1 sm:p-4">
                 <div class="space-y-3" id="history-list"></div>
@@ -741,14 +774,14 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         <!-- ===== VIEW: SETTINGS ===== -->
         <div id="view-settings" class="hidden view-transition space-y-6 admin-only">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">⚙️ Pengaturan Sistem</h2>
-                <p class="text-sm text-brand-muted mt-0.5">Kelola akun pengguna dan hak akses</p>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">⚙ System Settings</h2>
+                <p class="text-sm text-brand-muted mt-0.5">Manage user accounts and permissions</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Add User -->
                 <div class="glass rounded-2xl p-6 border border-brand-border/40 shadow-lg">
-                    <h3 class="text-md font-bold text-white mb-5">Tambah User Baru</h3>
+                    <h3 class="text-md font-bold text-white mb-5">Add New User</h3>
                     <form onsubmit="handleAddUser(event)" class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-brand-muted mb-1.5">Username</label>
@@ -759,20 +792,20 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                             <input type="text" id="new-user-pass" required class="w-full px-4 py-2.5 rounded-xl input-modern text-white" />
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-brand-muted mb-1.5">Hak Akses</label>
+                            <label class="block text-xs font-semibold text-brand-muted mb-1.5">Role</label>
                             <select id="new-user-role" class="w-full px-4 py-2.5 rounded-xl input-modern text-white">
                                 <option value="viewer">👀 View Only</option>
                                 <option value="admin">🔧 Admin</option>
                             </select>
                         </div>
-                        <button type="submit" class="w-full py-3.5 rounded-xl bg-cyan-500/80 hover:bg-cyan-500 text-white font-bold transition shadow-lg shadow-cyan-500/20">Buat User</button>
+                        <button type="submit" class="w-full py-3.5 rounded-xl bg-cyan-500/80 hover:bg-cyan-500 text-white font-bold transition shadow-lg shadow-cyan-500/20">Create User</button>
                     </form>
                 </div>
 
                 <!-- User List -->
                 <div class="lg:col-span-2 glass rounded-2xl border border-brand-border/40 shadow-lg flex flex-col overflow-hidden">
                     <div class="p-4 border-b border-brand-border/40 bg-brand-surface/30">
-                        <h3 class="text-md font-bold text-white">Daftar Akun Terdaftar</h3>
+                        <h3 class="text-md font-bold text-white">Registered Accounts</h3>
                     </div>
                     <div class="flex-1 overflow-auto">
                         <table class="w-full text-left border-collapse">
@@ -780,7 +813,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                                 <tr class="text-[10px] font-extrabold uppercase text-brand-muted tracking-wider">
                                     <th class="py-3 px-5">Username</th>
                                     <th class="py-3 px-5">Role</th>
-                                    <th class="py-3 px-5">Aksi</th>
+                                    <th class="py-3 px-5">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="user-table-body" class="divide-y divide-brand-border/20 text-sm"></tbody>
@@ -833,7 +866,6 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         csmViewer.role = 'viewer'; }
     localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
 
-    // ===== CHARTS INSTANCES =====
     let chartTop10Instance, chartBottom10Instance, chartTrendInstance, chartTopEventsInstance, chartStatusInstance;
 
     // ===== INIT =====
@@ -904,7 +936,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         appUsers.forEach((u, i) => {
             const roleColor = u.role === 'admin' ? 'text-emerald-400' : 'text-cyan-400';
             const del = u.username !== 'sewong' ?
-                `<button onclick="deleteUser(${i})" class="text-red-400 hover:text-red-300 font-bold text-xs transition">Hapus</button>` :
+                `<button onclick="deleteUser(${i})" class="text-red-400 hover:text-red-300 font-bold text-xs transition">Delete</button>` :
                 `<span class="text-xs text-brand-muted">Root</span>`;
             tbody.innerHTML +=
                 `<tr class="border-b border-brand-border/10 hover:bg-brand-primary/5 transition"><td class="py-3 px-5 text-white font-bold">${u.username}</td><td class="py-3 px-5 font-bold uppercase text-[10px] ${roleColor}">${u.role}</td><td class="py-3 px-5">${del}</td></tr>`;
@@ -916,17 +948,17 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         const uname = document.getElementById('new-user-name').value.trim();
         const pass = document.getElementById('new-user-pass').value.trim();
         const role = document.getElementById('new-user-role').value;
-        if (appUsers.find(u => u.username === uname)) { alert('Username sudah ada!'); return; }
+        if (appUsers.find(u => u.username === uname)) { alert('Username already exists!'); return; }
         appUsers.push({ username: uname, password: pass, role });
         localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
         document.getElementById('new-user-name').value = '';
         document.getElementById('new-user-pass').value = '';
         renderUsers();
-        alert(`User ${uname} berhasil ditambahkan!`);
+        alert(`User ${uname} created successfully!`);
     }
 
     function deleteUser(index) {
-        if (confirm('Hapus user ini?')) { appUsers.splice(index, 1);
+        if (confirm('Delete this user?')) { appUsers.splice(index, 1);
             localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
             renderUsers(); }
     }
@@ -963,9 +995,9 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
     function importExcel() {
         const fileInput = document.getElementById('import-file');
         const msg = document.getElementById('import-msg');
-        if (!fileInput.files.length) { alert('Pilih file Excel (.xlsx) terlebih dahulu!'); return; }
+        if (!fileInput.files.length) { alert('Please select an Excel (.xlsx) file first!'); return; }
         msg.classList.remove('hidden');
-        msg.innerText = '⏳ Membaca file...';
+        msg.innerText = '⏳ Reading file...';
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
@@ -980,7 +1012,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                             'Ticket'];
                         let dateStr = row['Date'] || row['Tanggal Event Selesai'] || row['Tanggal'];
                         let event = row['Event Name'] || row['Nama Kegiatan'] || row['Event'] ||
-                            'Event Import';
+                            'Imported Event';
                         if (ticket && dateStr) {
                             let items = [];
                             masterItemsList.forEach(itemName => {
@@ -1021,7 +1053,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                     });
                 });
                 saveState();
-                msg.innerText = `✅ Import ${importedCount} data ke lokal. Sinkronisasi ke Cloud...`;
+                msg.innerText = `✅ Imported ${importedCount} records locally. Syncing to Cloud...`;
                 (async function syncAll() {
                     let synced = 0;
                     for (let rec of trackingRecords) {
@@ -1029,13 +1061,13 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                             await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'insert',
                                     ...rec }) });
                             synced++;
-                            msg.innerText = `☁️ Sync ${synced}/${trackingRecords.length} ...`;
+                            msg.innerText = `☁️ Synced ${synced}/${trackingRecords.length} ...`;
                         } catch (e) {}
                     }
-                    msg.innerText = `✅ Selesai! ${trackingRecords.length} data tersinkron.`;
+                    msg.innerText = `✅ Done! ${trackingRecords.length} records synced.`;
                     setTimeout(() => msg.classList.add('hidden'), 4000);
                 })();
-            } catch (err) { msg.innerText = '❌ Gagal membaca file.';
+            } catch (err) { msg.innerText = '❌ Failed to read file.';
                 console.error(err); }
         };
         reader.readAsArrayBuffer(fileInput.files[0]);
@@ -1050,7 +1082,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         res.classList.remove('hidden');
         if (!records.length) {
             res.innerHTML =
-                `<div class="text-center py-6"><span class="text-5xl block mb-3 opacity-40">❌</span><p class="text-red-400 font-bold">Ticket tidak ditemukan.</p></div>`;
+                `<div class="text-center py-6"><span class="text-5xl block mb-3 opacity-40">✕</span><p class="text-red-400 font-bold">Ticket not found.</p></div>`;
             return;
         }
         let html = '';
@@ -1070,7 +1102,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                         <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-full border ${statusColor} border-current/30">${r.status}</span>
                     </div>
                     <div class="pt-2 border-t border-brand-border/30">
-                        <p class="text-xs font-bold text-brand-muted uppercase tracking-wider mb-2">Daftar Barang</p>
+                        <p class="text-xs font-bold text-brand-muted uppercase tracking-wider mb-2">Items borrowed</p>
                         <ul class="text-sm">${itemsList}</ul>
                     </div>
                 </div>
@@ -1085,8 +1117,8 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         let filtered = trackingRecords;
         if (start) filtered = filtered.filter(r => new Date(r.date) >= new Date(start));
         if (end) filtered = filtered.filter(r => new Date(r.date) <= new Date(end));
-        if (!filtered.length) { alert('Tidak ada data.'); return; }
-        let csv = 'Tanggal,Nomor Ticket,Nama Event,Status,Nama Barang,Quantity\n';
+        if (!filtered.length) { alert('No data to export.'); return; }
+        let csv = 'Date,Ticket Number,Event Name,Status,Item Name,Quantity\n';
         filtered.forEach(r => {
             r.items.forEach(i => {
                 let safeEvent = `"${(r.event || '').replace(/"/g, '""')}"`;
@@ -1121,7 +1153,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
 
         if (!filtered.length) {
             empty.classList.remove('hidden');
-            document.getElementById('pagination-info').innerText = 'Menampilkan 0 data';
+            document.getElementById('pagination-info').innerText = 'Showing 0 entries';
             document.getElementById('btn-prev').disabled = true;
             document.getElementById('btn-next').disabled = true;
             return;
@@ -1163,7 +1195,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         });
 
         document.getElementById('pagination-info').innerText =
-            `Menampilkan ${start + 1} - ${end} dari ${total} data (Halaman ${currentPage}/${pages})`;
+            `Showing ${start + 1} - ${end} of ${total} entries (Page ${currentPage}/${pages})`;
         document.getElementById('btn-prev').disabled = currentPage === 1;
         document.getElementById('btn-next').disabled = currentPage === pages;
     }
@@ -1188,7 +1220,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         div.className = 'flex items-center space-x-2 animate-fade-in';
         div.innerHTML = `
             <select class="item-select flex-1 px-3 py-2 rounded-lg bg-brand-bg/60 border border-brand-border/50 text-white font-medium text-xs focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(124,58,237,0.15)] outline-none transition">
-                <option value="" disabled ${!name ? 'selected' : ''}>-- Pilih Barang --</option>
+                <option value="" disabled ${!name ? 'selected' : ''}>-- Select Item --</option>
                 ${opts}
             </select>
             <input type="number" min="1" value="${qty}" class="item-qty w-16 px-2 py-2 rounded-lg bg-brand-bg/60 border border-brand-border/50 text-white text-xs text-center focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(124,58,237,0.15)] outline-none transition" />
@@ -1211,7 +1243,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             const qty = row.querySelector('.item-qty').value;
             if (name && qty > 0) items.push({ name, qty: parseInt(qty) });
         });
-        if (!items.length) { alert('Pilih minimal 1 barang!'); return; }
+        if (!items.length) { alert('Please select at least 1 item!'); return; }
 
         let action = 'insert';
         let record;
@@ -1240,12 +1272,12 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         document.getElementById('items-container').innerHTML = '';
         record.items.forEach(i => addFormItemRow(i.name, i.qty));
         document.getElementById('form-title').innerText = '✏️ Edit Mode';
-        document.getElementById('submit-btn').innerText = 'Update Data';
+        document.getElementById('submit-btn').innerText = 'Update Record';
         document.getElementById('cancel-edit-btn').classList.remove('hidden');
     }
 
     function deleteRecord(id) {
-        if (confirm('Yakin hapus record ini?')) {
+        if (confirm('Delete this record permanently?')) {
             trackingRecords = trackingRecords.filter(r => r.id !== id);
             saveState();
             if (document.getElementById('edit-id').value === id) resetForm();
@@ -1257,8 +1289,8 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         document.getElementById('loan-form').reset();
         document.getElementById('edit-id').value = '';
         initFormItems();
-        document.getElementById('form-title').innerText = 'Input Peminjaman Baru';
-        document.getElementById('submit-btn').innerText = 'Simpan Data';
+        document.getElementById('form-title').innerText = 'New Loan Entry';
+        document.getElementById('submit-btn').innerText = 'Save Record';
         document.getElementById('cancel-edit-btn').classList.add('hidden');
     }
 
@@ -1267,9 +1299,8 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         renderTable();
     }
 
-    // ===== DASHBOARD RENDER (tanpa Alerts, Heatmap di paling bawah) =====
+    // ===== DASHBOARD RENDER =====
     function renderDashboard() {
-        // 1. Stats
         const total = trackingRecords.length;
         const active = trackingRecords.filter(r => r.status === 'Dipinjam').length;
         const done = trackingRecords.filter(r => r.status === 'Kembali').length;
@@ -1294,7 +1325,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         document.getElementById('dash-overdue-loans').innerText = overdue;
         document.getElementById('dash-total-items').innerText = totalItems;
 
-        // 2. Charts
+        // Charts
         const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
         const top10 = sortedItems.slice(0, 10);
 
@@ -1333,7 +1364,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         if (chartTop10Instance) chartTop10Instance.destroy();
         chartTop10Instance = new Chart(document.getElementById('chartTop10'), {
             type: 'bar',
-            data: { labels: top10.map(i => i[0]), datasets: [{ label: 'Dipinjam', data: top10.map(i => i[1]),
+            data: { labels: top10.map(i => i[0]), datasets: [{ label: 'Borrowed', data: top10.map(i => i[1]),
                     backgroundColor: '#7c3aed80', borderRadius: 6 }] },
             options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' } }, y: { grid: { display: false } } } }
@@ -1342,7 +1373,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         if (chartTopEventsInstance) chartTopEventsInstance.destroy();
         chartTopEventsInstance = new Chart(document.getElementById('chartTopEvents'), {
             type: 'bar',
-            data: { labels: topEvents.map(i => i[0]), datasets: [{ label: 'Total Item', data: topEvents.map(i => i[1]),
+            data: { labels: topEvents.map(i => i[0]), datasets: [{ label: 'Total Items', data: topEvents.map(i => i[1]),
                     backgroundColor: '#06b6d480', borderRadius: 6 }] },
             options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
@@ -1352,7 +1383,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         chartStatusInstance = new Chart(document.getElementById('chartStatus'), {
             type: 'doughnut',
             data: {
-                labels: ['Dipinjam (Aktif)', 'Kembali (Selesai)'],
+                labels: ['Borrowed (Active)', 'Returned (Completed)'],
                 datasets: [{ data: statusData, backgroundColor: ['#f59e0b', '#34d399'], borderColor: '#1b1729',
                     borderWidth: 3 }]
             },
@@ -1363,7 +1394,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         if (chartBottom10Instance) chartBottom10Instance.destroy();
         chartBottom10Instance = new Chart(document.getElementById('chartBottom10'), {
             type: 'bar',
-            data: { labels: bottom10.map(i => i.name), datasets: [{ label: 'Dipinjam', data: bottom10.map(i => i.count),
+            data: { labels: bottom10.map(i => i.name), datasets: [{ label: 'Borrowed', data: bottom10.map(i => i.count),
                     backgroundColor: '#4f46e580', borderRadius: 6 }] },
             options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
@@ -1374,7 +1405,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             type: 'line',
             data: {
                 labels: monthLabels,
-                datasets: [{ label: 'Event', data: monthValues, borderColor: '#34d399',
+                datasets: [{ label: 'Events', data: monthValues, borderColor: '#34d399',
                     backgroundColor: 'rgba(52,211,153,0.08)', borderWidth: 3, pointBackgroundColor: '#7c3aed',
                     pointBorderColor: '#34d399', pointBorderWidth: 2, pointRadius: 5, fill: true, tension: 0.3 }]
             },
@@ -1383,11 +1414,11 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                         beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
 
-        // 3. Heatmap (paling bawah)
+        // Heatmap (bottom)
         renderHeatmap();
     }
 
-    // ===== HEATMAP RENDER =====
+    // ===== HEATMAP (corrected: darker = busier) =====
     function renderHeatmap() {
         const grid = document.getElementById('heatmap-grid');
         const monthDisplay = document.getElementById('heatmap-month');
@@ -1396,7 +1427,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         const month = now.getMonth();
         const today = new Date();
         const startDate = new Date(today);
-        startDate.setDate(today.getDate() - 29); // 30 hari termasuk hari ini
+        startDate.setDate(today.getDate() - 29);
         const dates = [];
         for (let i = 0; i < 30; i++) {
             const d = new Date(startDate);
@@ -1434,17 +1465,19 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             cells.push({ date, count, isInRange });
         }
 
+        // darker = busier: intensity 0..1, map to dark purple to bright orange
         grid.innerHTML = cells.map(cell => {
             if (!cell.isInRange || !cell.date) {
                 return `<div class="heatmap-cell heatmap-cell-empty"></div>`;
             }
-            const intensity = maxCount > 0 ? cell.count / maxCount : 0;
-            const r = Math.round(45 + intensity * 180);
-            const g = Math.round(36 + intensity * 160);
-            const b = Math.round(63 + intensity * 100);
+            const intensity = maxCount > 0 ? cell.count / maxCount : 0; // 0..1
+            // Darker: start from very dark (30,20,50) to bright (255,200,50)
+            const r = Math.round(30 + intensity * 225);
+            const g = Math.round(20 + intensity * 180);
+            const b = Math.round(50 + intensity * 0); // keep blue low for warmth
             const bgColor = `rgb(${r}, ${g}, ${b})`;
             const day = cell.date.getDate();
-            return `<div class="heatmap-cell" style="background:${bgColor};" title="${cell.date.toISOString().split('T')[0]} : ${cell.count} peminjaman">${day}</div>`;
+            return `<div class="heatmap-cell" style="background:${bgColor};" title="${cell.date.toISOString().split('T')[0]} : ${cell.count} loans">${day}</div>`;
         }).join('');
 
         monthDisplay.innerText = `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month]} ${year}`;
@@ -1475,7 +1508,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                             <h4 class="font-bold text-white text-md mb-0.5">${loan.ticket}</h4>
                             <p class="text-xs text-brand-muted">${formatDate(loan.date)}</p>
                         </div>
-                        <span class="px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-full border ${badge}">${days > 7 ? '🔥 Overdue' : '⚠️ Active'} (${days}h)</span>
+                        <span class="px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-full border ${badge}">${days > 7 ? '🔥 Overdue' : '⚠️ Active'} (${days}d)</span>
                     </div>
                     <div class="p-4 flex-1">
                         <p class="text-sm font-bold text-cyan-400 mb-3 leading-tight">${loan.event}</p>
@@ -1495,7 +1528,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             list.innerHTML += `
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-brand-bg/40 rounded-xl border border-brand-border/30 hover:border-brand-border/60 transition">
                     <div class="flex items-start space-x-4 mb-3 sm:mb-0">
-                        <span class="text-2xl mt-0.5">${record.status === 'Kembali' ? '✅' : '⚠️'}</span>
+                        <span class="text-2xl mt-0.5">${record.status === 'Kembali' ? '✓' : '⚠'}</span>
                         <div>
                             <h4 class="font-bold text-white">${record.ticket} <span class="text-brand-muted text-xs font-normal ml-2">${formatDate(record.date)}</span></h4>
                             <p class="text-sm text-cyan-400 mt-0.5">${record.event}</p>
@@ -1510,7 +1543,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
 
     function formatDate(dateString) {
         if (!dateString) return '';
-        try { return new Date(dateString).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }); } catch (
+        try { return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); } catch (
         e) { return dateString; }
     }
 </script>
