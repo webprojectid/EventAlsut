@@ -414,49 +414,65 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
 
     <div class="p-4 sm:p-6 md:p-8 w-full max-w-7xl mx-auto space-y-8 pb-24">
 
-        <!-- ===== VIEW: DASHBOARD ===== -->
+        <!-- ===== VIEW: DASHBOARD (REVISED) ===== -->
         <div id="view-dashboard" class="view-transition space-y-7">
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Executive Dashboard</h2>
-                    <p class="text-sm text-brand-muted mt-0.5">Ringkasan performa logistik event</p>
+                    <p class="text-sm text-brand-muted mt-0.5">Analisis lengkap performa logistik event</p>
                 </div>
                 <span class="text-xs text-brand-muted bg-brand-surface px-3 py-1.5 rounded-full border border-brand-border/40">Live</span>
             </div>
 
-            <!-- Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-                <div class="stat-card glass rounded-2xl p-5 border border-brand-border/40 shadow-lg">
-                    <p class="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Peminjaman</p>
-                    <p class="text-3xl font-extrabold text-white" id="dash-total-loans">0</p>
+            <!-- Stats: 5 Cards (Total, Active, Done, Overdue, Total Items) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <div class="stat-card glass rounded-2xl p-4 border border-brand-border/40 shadow-lg">
+                    <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Peminjaman</p>
+                    <p class="text-2xl font-extrabold text-white" id="dash-total-loans">0</p>
                 </div>
-                <div class="stat-card glass rounded-2xl p-5 border border-cyan-500/30 shadow-lg shadow-cyan-500/5">
-                    <p class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1">Active / Ongoing</p>
-                    <p class="text-3xl font-extrabold text-cyan-400" id="dash-active-loans">0</p>
+                <div class="stat-card glass rounded-2xl p-4 border border-cyan-500/30 shadow-lg shadow-cyan-500/5">
+                    <p class="text-[10px] font-semibold text-cyan-400 uppercase tracking-wider mb-1">Active / Ongoing</p>
+                    <p class="text-2xl font-extrabold text-cyan-400" id="dash-active-loans">0</p>
                 </div>
-                <div class="stat-card glass rounded-2xl p-5 border border-emerald-500/30 shadow-lg shadow-emerald-500/5">
-                    <p class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Selesai / Clear</p>
-                    <p class="text-3xl font-extrabold text-emerald-400" id="dash-done-loans">0</p>
+                <div class="stat-card glass rounded-2xl p-4 border border-emerald-500/30 shadow-lg shadow-emerald-500/5">
+                    <p class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Selesai / Clear</p>
+                    <p class="text-2xl font-extrabold text-emerald-400" id="dash-done-loans">0</p>
                 </div>
-                <div class="stat-card glass rounded-2xl p-5 border border-brand-border/40 shadow-lg">
-                    <p class="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Item Unit</p>
-                    <p class="text-3xl font-extrabold text-white" id="dash-total-items">0</p>
+                <div class="stat-card glass rounded-2xl p-4 border border-red-500/30 shadow-lg shadow-red-500/5">
+                    <p class="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1">Overdue (>7 hari)</p>
+                    <p class="text-2xl font-extrabold text-red-400" id="dash-overdue-loans">0</p>
+                </div>
+                <div class="stat-card glass rounded-2xl p-4 border border-brand-border/40 shadow-lg">
+                    <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Item Unit</p>
+                    <p class="text-2xl font-extrabold text-white" id="dash-total-items">0</p>
                 </div>
             </div>
 
-            <!-- Charts -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Charts Row 2: 3 Columns (Most Borrowed, Top Events, Status Distribution) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
                     <h3 class="text-sm font-bold text-white mb-4">🏆 Top 10 Sering Dipinjam</h3>
-                    <div class="relative h-64 w-full"><canvas id="chartTop10"></canvas></div>
+                    <div class="relative h-56 w-full"><canvas id="chartTop10"></canvas></div>
                 </div>
+                <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
+                    <h3 class="text-sm font-bold text-white mb-4">🎯 Top 5 Event (Total Item)</h3>
+                    <div class="relative h-56 w-full"><canvas id="chartTopEvents"></canvas></div>
+                </div>
+                <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
+                    <h3 class="text-sm font-bold text-white mb-4">📊 Distribusi Status</h3>
+                    <div class="relative h-56 w-full"><canvas id="chartStatus"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Charts Row 3: 2 Columns (Least Borrowed, Monthly Trend) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
                     <h3 class="text-sm font-bold text-white mb-4">📉 Top 10 Jarang Dipinjam</h3>
                     <div class="relative h-64 w-full"><canvas id="chartBottom10"></canvas></div>
                 </div>
-                <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover lg:col-span-2">
+                <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
                     <h3 class="text-sm font-bold text-white mb-4">📈 Tren Peminjaman Per Bulan</h3>
-                    <div class="relative h-72 w-full"><canvas id="chartTrend"></canvas></div>
+                    <div class="relative h-64 w-full"><canvas id="chartTrend"></canvas></div>
                 </div>
             </div>
         </div>
@@ -730,7 +746,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         csmViewer.role = 'viewer'; }
     localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
 
-    let chartTop10Instance, chartBottom10Instance, chartTrendInstance;
+    let chartTop10Instance, chartBottom10Instance, chartTrendInstance, chartTopEventsInstance, chartStatusInstance;
 
     // ===== INIT =====
     window.onload = () => {
@@ -873,7 +889,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                     const json = XLSX.utils.sheet_to_json(ws, { raw: false, dateNF: 'yyyy-mm-dd' });
                     json.forEach(row => {
                         let ticket = row['Ticket Number'] || row['No Tiket'] || row['No. Tiket'] || row[
-                        'Ticket'];
+                            'Ticket'];
                         let dateStr = row['Date'] || row['Tanggal Event Selesai'] || row['Tanggal'];
                         let event = row['Event Name'] || row['Nama Kegiatan'] || row['Event'] ||
                             'Event Import';
@@ -1163,63 +1179,128 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         renderTable();
     }
 
-    // ===== DASHBOARD CHARTS =====
+    // ===== DASHBOARD CHARTS (REVISED) =====
     function renderDashboard() {
-        document.getElementById('dash-total-loans').innerText = trackingRecords.length;
-        document.getElementById('dash-active-loans').innerText = trackingRecords.filter(r => r.status === 'Dipinjam').length;
-        document.getElementById('dash-done-loans').innerText = trackingRecords.filter(r => r.status === 'Kembali').length;
+        // 1. Update Stats
+        const total = trackingRecords.length;
+        const active = trackingRecords.filter(r => r.status === 'Dipinjam').length;
+        const done = trackingRecords.filter(r => r.status === 'Kembali').length;
+        
+        // Overdue: Active loans > 7 days
+        const now = new Date();
+        const overdue = trackingRecords.filter(r => {
+            if (r.status !== 'Dipinjam') return false;
+            const diffDays = Math.ceil((now - new Date(r.date)) / (1000 * 60 * 60 * 24));
+            return diffDays > 7;
+        }).length;
 
-        const counts = {};
-        trackingRecords.forEach(r => r.items.forEach(i => counts[i.name] = (counts[i.name] || 0) + parseInt(i.qty)));
-        document.getElementById('dash-total-items').innerText = Object.values(counts).reduce((a, b) => a + b, 0);
+        let totalItems = 0;
+        const itemCounts = {};
+        trackingRecords.forEach(r => {
+            r.items.forEach(i => {
+                const qty = parseInt(i.qty) || 0;
+                itemCounts[i.name] = (itemCounts[i.name] || 0) + qty;
+                totalItems += qty;
+            });
+        });
 
-        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-        const allItems = [...masterItemsList].map(n => ({ name: n, count: counts[n] || 0 })).sort((a, b) => a.count - b.count);
-        const top10 = sorted.slice(0, 10);
-        const bottom10 = allItems.slice(0, 10);
+        document.getElementById('dash-total-loans').innerText = total;
+        document.getElementById('dash-active-loans').innerText = active;
+        document.getElementById('dash-done-loans').innerText = done;
+        document.getElementById('dash-overdue-loans').innerText = overdue;
+        document.getElementById('dash-total-items').innerText = totalItems;
 
+        // 2. Top 10 Most Borrowed (Item)
+        const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
+        const top10 = sortedItems.slice(0, 10);
+
+        // 3. Top 5 Events by Total Items
+        const eventCounts = {};
+        trackingRecords.forEach(r => {
+            const totalQty = r.items.reduce((sum, i) => sum + (parseInt(i.qty) || 0), 0);
+            if (!eventCounts[r.event]) eventCounts[r.event] = 0;
+            eventCounts[r.event] += totalQty;
+        });
+        const topEvents = Object.entries(eventCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+        // 4. Status Distribution
+        const statusData = [active, done];
+
+        // 5. Bottom 10 Least Borrowed (from master list)
+        const allItemsWithCount = masterItemsList.map(name => ({ name, count: itemCounts[name] || 0 }));
+        allItemsWithCount.sort((a, b) => a.count - b.count);
+        const bottom10 = allItemsWithCount.slice(0, 10);
+
+        // 6. Monthly Trend
         const monthMap = {};
         trackingRecords.forEach(r => {
             const d = new Date(r.date);
-            if (!isNaN(d)) monthMap[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`] = (monthMap[`${d
-                    .getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`] || 0) + 1;
+            if (!isNaN(d)) {
+                const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                monthMap[key] = (monthMap[key] || 0) + 1;
+            }
         });
         const sortedMonths = Object.keys(monthMap).sort();
-        const monthLabels = sortedMonths.map(m => `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m.split('-')[1])-1]} ${m.split('-')[0]}`);
+        const monthLabels = sortedMonths.map(m => {
+            const [year, month] = m.split('-');
+            return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(month)-1]} ${year}`;
+        });
+        const monthValues = sortedMonths.map(m => monthMap[m]);
 
+        // --- Render Charts ---
         Chart.defaults.color = '#8b8aa0';
         Chart.defaults.font.family = 'Inter, sans-serif';
 
+        // Top 10
         if (chartTop10Instance) chartTop10Instance.destroy();
         chartTop10Instance = new Chart(document.getElementById('chartTop10'), {
             type: 'bar',
-            data: {
-                labels: top10.map(i => i[0]),
-                datasets: [{ label: 'Dipinjam', data: top10.map(i => i[1]), backgroundColor: '#7c3aed80',
-                    borderRadius: 6 }]
-            },
+            data: { labels: top10.map(i => i[0]), datasets: [{ label: 'Dipinjam', data: top10.map(i => i[1]),
+                    backgroundColor: '#7c3aed80', borderRadius: 6 }] },
             options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' } }, y: { grid: { display: false } } } }
         });
 
-        if (chartBottom10Instance) chartBottom10Instance.destroy();
-        chartBottom10Instance = new Chart(document.getElementById('chartBottom10'), {
+        // Top Events
+        if (chartTopEventsInstance) chartTopEventsInstance.destroy();
+        chartTopEventsInstance = new Chart(document.getElementById('chartTopEvents'), {
             type: 'bar',
-            data: {
-                labels: bottom10.map(i => i.name),
-                datasets: [{ label: 'Dipinjam', data: bottom10.map(i => i.count), backgroundColor: '#4f46e580',
-                    borderRadius: 6 }]
-            },
+            data: { labels: topEvents.map(i => i[0]), datasets: [{ label: 'Total Item', data: topEvents.map(i => i[1]),
+                    backgroundColor: '#06b6d480', borderRadius: 6 }] },
             options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
         });
 
+        // Status Distribution (Doughnut)
+        if (chartStatusInstance) chartStatusInstance.destroy();
+        chartStatusInstance = new Chart(document.getElementById('chartStatus'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Dipinjam (Aktif)', 'Kembali (Selesai)'],
+                datasets: [{ data: statusData, backgroundColor: ['#f59e0b', '#34d399'], borderColor: '#1b1729',
+                    borderWidth: 3 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom',
+                        labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } } }, cutout: '65%' }
+        });
+
+        // Bottom 10
+        if (chartBottom10Instance) chartBottom10Instance.destroy();
+        chartBottom10Instance = new Chart(document.getElementById('chartBottom10'), {
+            type: 'bar',
+            data: { labels: bottom10.map(i => i.name), datasets: [{ label: 'Dipinjam', data: bottom10.map(i => i.count),
+                    backgroundColor: '#4f46e580', borderRadius: 6 }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
+        });
+
+        // Monthly Trend
         if (chartTrendInstance) chartTrendInstance.destroy();
         chartTrendInstance = new Chart(document.getElementById('chartTrend'), {
             type: 'line',
             data: {
                 labels: monthLabels,
-                datasets: [{ label: 'Event', data: sortedMonths.map(m => monthMap[m]), borderColor: '#34d399',
+                datasets: [{ label: 'Event', data: monthValues, borderColor: '#34d399',
                     backgroundColor: 'rgba(52,211,153,0.08)', borderWidth: 3, pointBackgroundColor: '#7c3aed',
                     pointBorderColor: '#34d399', pointBorderWidth: 2, pointRadius: 5, fill: true, tension: 0.3 }]
             },
