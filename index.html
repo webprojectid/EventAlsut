@@ -297,6 +297,55 @@
             background: #4f46e5;
             border-radius: 4px;
         }
+
+        /* Heatmap grid */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            transition: all 0.2s ease;
+            cursor: default;
+            min-height: 32px;
+        }
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            z-index: 2;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        }
+        .heatmap-cell-empty {
+            background: rgba(45,36,63,0.2);
+            border: 1px dashed rgba(45,36,63,0.3);
+        }
+        .heatmap-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #8b8aa0;
+            text-align: center;
+            font-weight: 600;
+        }
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: #8b8aa0;
+        }
+        .heatmap-legend .color-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -414,7 +463,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
 
     <div class="p-4 sm:p-6 md:p-8 w-full max-w-7xl mx-auto space-y-8 pb-24">
 
-        <!-- ===== VIEW: DASHBOARD (REVISED) ===== -->
+        <!-- ===== VIEW: DASHBOARD ===== -->
         <div id="view-dashboard" class="view-transition space-y-7">
             <div class="flex items-center justify-between">
                 <div>
@@ -424,7 +473,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 <span class="text-xs text-brand-muted bg-brand-surface px-3 py-1.5 rounded-full border border-brand-border/40">Live</span>
             </div>
 
-            <!-- Stats: 5 Cards (Total, Active, Done, Overdue, Total Items) -->
+            <!-- Stats: 5 Cards -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 <div class="stat-card glass rounded-2xl p-4 border border-brand-border/40 shadow-lg">
                     <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Total Peminjaman</p>
@@ -473,6 +522,44 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
                     <h3 class="text-sm font-bold text-white mb-4">📈 Tren Peminjaman Per Bulan</h3>
                     <div class="relative h-64 w-full"><canvas id="chartTrend"></canvas></div>
+                </div>
+            </div>
+
+            <!-- ===== HEATMAP KALENDER (PALING BAWAH) ===== -->
+            <div class="glass rounded-2xl p-5 border border-brand-border/40 shadow-lg card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-white flex items-center">
+                        <span class="mr-2">🔥</span> Heatmap Peminjaman (30 Hari Terakhir)
+                        <span class="ml-2 text-[10px] font-normal text-brand-muted">semakin gelap = semakin padat</span>
+                    </h3>
+                    <span class="text-xs text-brand-muted" id="heatmap-month"></span>
+                </div>
+                <div class="overflow-x-auto">
+                    <div id="heatmap-container" class="min-w-[320px]">
+                        <!-- header hari -->
+                        <div class="heatmap-grid mb-1" id="heatmap-header">
+                            <div class="heatmap-label">Sen</div>
+                            <div class="heatmap-label">Sel</div>
+                            <div class="heatmap-label">Rab</div>
+                            <div class="heatmap-label">Kam</div>
+                            <div class="heatmap-label">Jum</div>
+                            <div class="heatmap-label">Sab</div>
+                            <div class="heatmap-label">Min</div>
+                        </div>
+                        <!-- grid -->
+                        <div id="heatmap-grid" class="heatmap-grid"></div>
+                        <!-- legend -->
+                        <div class="flex justify-end mt-3 heatmap-legend">
+                            <span>Rendah</span>
+                            <span class="color-swatch" style="background:#2d243f;"></span>
+                            <span class="color-swatch" style="background:#4f46e5;"></span>
+                            <span class="color-swatch" style="background:#7c3aed;"></span>
+                            <span class="color-swatch" style="background:#a78bfa;"></span>
+                            <span class="color-swatch" style="background:#c084fc;"></span>
+                            <span class="color-swatch" style="background:#f59e0b;"></span>
+                            <span>Tinggi</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -746,6 +833,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         csmViewer.role = 'viewer'; }
     localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
 
+    // ===== CHARTS INSTANCES =====
     let chartTop10Instance, chartBottom10Instance, chartTrendInstance, chartTopEventsInstance, chartStatusInstance;
 
     // ===== INIT =====
@@ -1179,21 +1267,18 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         renderTable();
     }
 
-    // ===== DASHBOARD CHARTS (REVISED) =====
+    // ===== DASHBOARD RENDER (tanpa Alerts, Heatmap di paling bawah) =====
     function renderDashboard() {
-        // 1. Update Stats
+        // 1. Stats
         const total = trackingRecords.length;
         const active = trackingRecords.filter(r => r.status === 'Dipinjam').length;
         const done = trackingRecords.filter(r => r.status === 'Kembali').length;
-        
-        // Overdue: Active loans > 7 days
         const now = new Date();
         const overdue = trackingRecords.filter(r => {
             if (r.status !== 'Dipinjam') return false;
             const diffDays = Math.ceil((now - new Date(r.date)) / (1000 * 60 * 60 * 24));
             return diffDays > 7;
         }).length;
-
         let totalItems = 0;
         const itemCounts = {};
         trackingRecords.forEach(r => {
@@ -1203,18 +1288,16 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 totalItems += qty;
             });
         });
-
         document.getElementById('dash-total-loans').innerText = total;
         document.getElementById('dash-active-loans').innerText = active;
         document.getElementById('dash-done-loans').innerText = done;
         document.getElementById('dash-overdue-loans').innerText = overdue;
         document.getElementById('dash-total-items').innerText = totalItems;
 
-        // 2. Top 10 Most Borrowed (Item)
+        // 2. Charts
         const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
         const top10 = sortedItems.slice(0, 10);
 
-        // 3. Top 5 Events by Total Items
         const eventCounts = {};
         trackingRecords.forEach(r => {
             const totalQty = r.items.reduce((sum, i) => sum + (parseInt(i.qty) || 0), 0);
@@ -1223,15 +1306,12 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         });
         const topEvents = Object.entries(eventCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-        // 4. Status Distribution
         const statusData = [active, done];
 
-        // 5. Bottom 10 Least Borrowed (from master list)
         const allItemsWithCount = masterItemsList.map(name => ({ name, count: itemCounts[name] || 0 }));
         allItemsWithCount.sort((a, b) => a.count - b.count);
         const bottom10 = allItemsWithCount.slice(0, 10);
 
-        // 6. Monthly Trend
         const monthMap = {};
         trackingRecords.forEach(r => {
             const d = new Date(r.date);
@@ -1247,11 +1327,9 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         });
         const monthValues = sortedMonths.map(m => monthMap[m]);
 
-        // --- Render Charts ---
         Chart.defaults.color = '#8b8aa0';
         Chart.defaults.font.family = 'Inter, sans-serif';
 
-        // Top 10
         if (chartTop10Instance) chartTop10Instance.destroy();
         chartTop10Instance = new Chart(document.getElementById('chartTop10'), {
             type: 'bar',
@@ -1261,7 +1339,6 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' } }, y: { grid: { display: false } } } }
         });
 
-        // Top Events
         if (chartTopEventsInstance) chartTopEventsInstance.destroy();
         chartTopEventsInstance = new Chart(document.getElementById('chartTopEvents'), {
             type: 'bar',
@@ -1271,7 +1348,6 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
         });
 
-        // Status Distribution (Doughnut)
         if (chartStatusInstance) chartStatusInstance.destroy();
         chartStatusInstance = new Chart(document.getElementById('chartStatus'), {
             type: 'doughnut',
@@ -1284,7 +1360,6 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                         labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } } }, cutout: '65%' }
         });
 
-        // Bottom 10
         if (chartBottom10Instance) chartBottom10Instance.destroy();
         chartBottom10Instance = new Chart(document.getElementById('chartBottom10'), {
             type: 'bar',
@@ -1294,7 +1369,6 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 scales: { x: { grid: { color: 'rgba(45,36,63,0.3)' }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
         });
 
-        // Monthly Trend
         if (chartTrendInstance) chartTrendInstance.destroy();
         chartTrendInstance = new Chart(document.getElementById('chartTrend'), {
             type: 'line',
@@ -1308,6 +1382,72 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                 scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(45,36,63,0.3)' },
                         beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
+
+        // 3. Heatmap (paling bawah)
+        renderHeatmap();
+    }
+
+    // ===== HEATMAP RENDER =====
+    function renderHeatmap() {
+        const grid = document.getElementById('heatmap-grid');
+        const monthDisplay = document.getElementById('heatmap-month');
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - 29); // 30 hari termasuk hari ini
+        const dates = [];
+        for (let i = 0; i < 30; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + i);
+            dates.push(d);
+        }
+        const loanCountPerDay = {};
+        trackingRecords.forEach(r => {
+            const d = new Date(r.date);
+            const key = d.toISOString().split('T')[0];
+            loanCountPerDay[key] = (loanCountPerDay[key] || 0) + 1;
+        });
+
+        const counts = dates.map(d => {
+            const key = d.toISOString().split('T')[0];
+            return loanCountPerDay[key] || 0;
+        });
+        const maxCount = Math.max(1, ...counts);
+
+        const firstDayOfWeek = dates[0].getDay();
+        const offset = (firstDayOfWeek === 0) ? 6 : firstDayOfWeek - 1;
+        const totalCells = 42;
+        const cells = [];
+        for (let i = 0; i < totalCells; i++) {
+            const dayIndex = i - offset;
+            let date = null;
+            let count = 0;
+            let isInRange = false;
+            if (dayIndex >= 0 && dayIndex < dates.length) {
+                date = dates[dayIndex];
+                const key = date.toISOString().split('T')[0];
+                count = loanCountPerDay[key] || 0;
+                isInRange = true;
+            }
+            cells.push({ date, count, isInRange });
+        }
+
+        grid.innerHTML = cells.map(cell => {
+            if (!cell.isInRange || !cell.date) {
+                return `<div class="heatmap-cell heatmap-cell-empty"></div>`;
+            }
+            const intensity = maxCount > 0 ? cell.count / maxCount : 0;
+            const r = Math.round(45 + intensity * 180);
+            const g = Math.round(36 + intensity * 160);
+            const b = Math.round(63 + intensity * 100);
+            const bgColor = `rgb(${r}, ${g}, ${b})`;
+            const day = cell.date.getDate();
+            return `<div class="heatmap-cell" style="background:${bgColor};" title="${cell.date.toISOString().split('T')[0]} : ${cell.count} peminjaman">${day}</div>`;
+        }).join('');
+
+        monthDisplay.innerText = `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month]} ${year}`;
     }
 
     // ===== ACTIVE LOANS =====
