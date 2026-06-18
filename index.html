@@ -757,6 +757,19 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                     </div>
                     <div id="import-msg" class="text-xs font-bold text-emerald-400 mt-3 hidden"></div>
                 </div>
+
+                <!-- Cloud Sync -->
+                <div class="glass rounded-2xl p-6 border border-brand-border/40 shadow-lg card-hover md:col-span-2">
+                    <h3 class="text-lg font-bold text-cyan-400 mb-2 flex items-center"><span class="text-2xl mr-2">☁</span> Cloud Sync (Google Sheet)</h3>
+                    <p class="text-sm text-brand-muted mb-4 leading-relaxed">
+                        Setiap Save / Update / Delete otomatis dikirim ke Google Sheet. Data juga otomatis ke-pull tiap kali halaman dibuka. Pakai tombol ini kalau mau sync manual / force refresh.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="pullFromCloud()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-500/80 hover:bg-cyan-500 text-white font-bold transition shadow-lg shadow-cyan-500/20 whitespace-nowrap">⬇ Pull from Cloud</button>
+                        <button onclick="pushAllToCloud()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500/80 hover:bg-emerald-500 text-white font-bold transition shadow-lg shadow-emerald-500/20 whitespace-nowrap admin-only">⬆ Push All to Cloud</button>
+                    </div>
+                    <div id="sync-status" class="text-xs font-bold text-brand-muted mt-3"></div>
+                </div>
             </div>
         </div>
 
@@ -832,7 +845,9 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
     // ===== CONSTANTS =====
     const DB_KEY = 'binus_alsut_records';
     const USER_DB_KEY = 'binus_users_db';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzb4nx2aJPS2eXIeYCxE9cob4lana2wt2iLqIveV7G5FJa1chrzYZbPGijyDID0tdCpWA/exec';
+    // ⚠️ GANTI URL INI dengan Web App URL hasil Deploy dari Code.gs yang nempel di Sheet:
+    // https://docs.google.com/spreadsheets/d/1M1-ivtv81YiLPhJnlvPHnv-ODCvVdhl8WKzuk2KtBnU
+    const API_URL = 'https://script.google.com/macros/s/AKfycbysRUbJD5vJZp22sEWwPm7k0BYQed840Hvd4yBQaswe4Y1i1M9MLLHjG3PmNCxZg3ou7w/exec';
     let currentUser = null;
     let currentPage = 1;
     const rowsPerPage = 10;
@@ -879,15 +894,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         } catch (e) { localStorage.removeItem('binus_current_session'); }
         renderUsers();
 
-        fetch(API_URL)
-            .then(r => r.json())
-            .then(data => {
-                if (data && Array.isArray(data) && data.length) {
-                    trackingRecords = data;
-                    saveState();
-                }
-            })
-            .catch(() => {});
+        pullFromCloud(true);
     };
 
     // ===== AUTH =====
@@ -1258,7 +1265,10 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         }
         saveState();
         resetForm();
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, ...record }) }).catch(() => {});
+        setSyncStatus('⏳ Syncing to cloud...');
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, ...record }) })
+            .then(() => setSyncStatus(`✅ Synced (${action}) — ${new Date().toLocaleTimeString()}`))
+            .catch(() => setSyncStatus('⚠️ Saved locally, but cloud sync failed.'));
     }
 
     function editRecord(id) {
@@ -1281,7 +1291,10 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
             trackingRecords = trackingRecords.filter(r => r.id !== id);
             saveState();
             if (document.getElementById('edit-id').value === id) resetForm();
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id }) }).catch(() => {});
+            setSyncStatus('⏳ Syncing delete to cloud...');
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id }) })
+                .then(() => setSyncStatus(`✅ Deleted & synced — ${new Date().toLocaleTimeString()}`))
+                .catch(() => setSyncStatus('⚠️ Deleted locally, but cloud sync failed.'));
         }
     }
 
@@ -1297,6 +1310,42 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
     function saveState() {
         localStorage.setItem(DB_KEY, JSON.stringify(trackingRecords));
         renderTable();
+    }
+
+    // ===== CLOUD SYNC (manual + shared helpers) =====
+    function setSyncStatus(text) {
+        const el = document.getElementById('sync-status');
+        if (el) el.innerText = text;
+    }
+
+    async function pullFromCloud(silent) {
+        if (!silent) setSyncStatus('⏳ Pulling from cloud...');
+        try {
+            const r = await fetch(API_URL);
+            const data = await r.json();
+            if (Array.isArray(data)) {
+                trackingRecords = data;
+                saveState();
+                setSyncStatus(`✅ Synced ${data.length} record(s) from cloud — ${new Date().toLocaleTimeString()}`);
+            } else {
+                setSyncStatus('⚠️ Cloud returned unexpected data.');
+            }
+        } catch (e) {
+            setSyncStatus('❌ Failed to reach cloud. Cek koneksi / API_URL.');
+        }
+    }
+
+    async function pushAllToCloud() {
+        if (!trackingRecords.length) { setSyncStatus('⚠️ No local records to push.'); return; }
+        let synced = 0;
+        for (const rec of trackingRecords) {
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'insert', ...rec }) });
+                synced++;
+                setSyncStatus(`☁️ Pushing ${synced}/${trackingRecords.length}...`);
+            } catch (e) {}
+        }
+        setSyncStatus(`✅ Pushed ${synced}/${trackingRecords.length} record(s) to cloud — ${new Date().toLocaleTimeString()}`);
     }
 
     // ===== DASHBOARD RENDER =====
