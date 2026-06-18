@@ -847,7 +847,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
     const USER_DB_KEY = 'binus_users_db';
     // ⚠️ GANTI URL INI dengan Web App URL hasil Deploy dari Code.gs yang nempel di Sheet:
     // https://docs.google.com/spreadsheets/d/1M1-ivtv81YiLPhJnlvPHnv-ODCvVdhl8WKzuk2KtBnU
-    const API_URL = 'https://script.google.com/macros/s/AKfycbysRUbJD5vJZp22sEWwPm7k0BYQed840Hvd4yBQaswe4Y1i1M9MLLHjG3PmNCxZg3ou7w/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzb4nx2aJPS2eXIeYCxE9cob4lana2wt2iLqIveV7G5FJa1chrzYZbPGijyDID0tdCpWA/exec';
     let currentUser = null;
     let currentPage = 1;
     const rowsPerPage = 10;
@@ -1257,7 +1257,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
         let action = 'insert';
         let record;
         if (id) {
-            const idx = trackingRecords.findIndex(r => r.id === id);
+            const idx = trackingRecords.findIndex(r => String(r.id) === String(id));
             record = { id, date, ticket, event, items, status };
             if (idx !== -1) trackingRecords[idx] = record;
             action = 'update';
@@ -1274,7 +1274,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
     }
 
     function editRecord(id) {
-        const record = trackingRecords.find(r => r.id === id);
+        const record = trackingRecords.find(r => String(r.id) === String(id));
         if (!record) return;
         document.getElementById('edit-id').value = record.id;
         document.getElementById('input-date').value = record.date;
@@ -1290,7 +1290,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
 
     function deleteRecord(id) {
         if (confirm('Delete this record permanently?')) {
-            trackingRecords = trackingRecords.filter(r => r.id !== id);
+            trackingRecords = trackingRecords.filter(r => String(r.id) !== String(id));
             saveState();
             if (document.getElementById('edit-id').value === id) resetForm();
             setSyncStatus('⏳ Syncing delete to cloud...');
