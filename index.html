@@ -1020,6 +1020,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                         let dateStr = row['Date'] || row['Tanggal Event Selesai'] || row['Tanggal'];
                         let event = row['Event Name'] || row['Nama Kegiatan'] || row['Event'] ||
                             'Imported Event';
+                        let technician = row['IT technician'] || row['Teknisi'] || row['Technician'] || '';
                         if (ticket && dateStr) {
                             let items = [];
                             masterItemsList.forEach(itemName => {
@@ -1049,6 +1050,7 @@ class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font
                                     date: finalDate,
                                     ticket: String(ticket).trim(),
                                     event: event,
+                                    technician: technician,
                                     status: 'Kembali',
                                     items
                                 };
