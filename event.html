@@ -16,7 +16,6 @@
     <!-- PREVENT FLASH: Cek session SEBELUM render -->
     <!-- ============================================================ -->
     <script>
-        // HIDE LOGIN PAGE IMMEDIATELY IF SESSION EXISTS
         (function() {
             try {
                 const USER_DB_KEY = 'binus_users_db';
@@ -24,8 +23,6 @@
                 if (saved && saved !== "undefined") {
                     const u = JSON.parse(saved);
                     if (u && u.role) {
-                        // Session valid — kita bakal langsung hidden-in login page
-                        // Tapi karena DOM belum render, kita pake flag
                         window.__SESSION_VALID = true;
                         window.__SESSION_USER = u;
                     }
@@ -33,7 +30,6 @@
             } catch (e) {}
         })();
     </script>
-    <!-- ============================================================ -->
 
     <script>
         tailwind.config = {
@@ -86,7 +82,7 @@
     <style>
         :root,
         [data-theme="light"] {
-            /* LIGHT MODE */
+            color-scheme: light; /* Mencegah dropdown bawaan berwarna gelap/abu kusam */
             --brand-bg: #F4F6FC;
             --brand-bg-2: #ECEFFC;
             --brand-surface: #FFFFFF;
@@ -101,9 +97,7 @@
             --brand-text: #1E1B3A;
 
             --glass-bg: rgba(255, 255, 255, 0.72);
-            --glass-border: rgba(109, 93, 252, 0.16);
             --input-bg: rgba(255, 255, 255, 0.92);
-            --input-border: rgba(109, 93, 252, 0.22);
             --table-header-bg: #F0F2FC;
 
             --card-glass-bg: linear-gradient(165deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.42) 100%);
@@ -148,24 +142,13 @@
             --form-select-arrow: #6D5DFC;
             --form-placeholder: #9AA0B8;
             --form-disabled: #F0F2FC;
-
-            --cal-bg: #FFFFFF;
-            --cal-text: #1E1B3A;
-            --cal-border: #D1D5F0;
-            --cal-hover: #F0F2FC;
-            --cal-selected: #6D5DFC;
-            --cal-selected-text: #FFFFFF;
-            --cal-today: #6D5DFC20;
-
-            --menu-card-bg: rgba(255, 255, 255, 0.75);
-            --menu-card-border: rgba(109, 93, 252, 0.12);
-            --menu-card-shadow: rgba(31, 41, 119, 0.10);
-            --menu-card-hover-border: #6D5DFC;
-            --menu-icon-bg: rgba(109, 93, 252, 0.10);
+            
+            --nav-active-bg: #6D5DFC;
+            --nav-active-text: #FFFFFF;
         }
 
         [data-theme="dark"] {
-            /* DARK MODE */
+            color-scheme: dark; /* Memaksa scrollbar dan dropdown bawaan menjadi gelap elegan */
             --brand-bg: #0A0714;
             --brand-bg-2: #120B26;
             --brand-surface: #120D22;
@@ -180,9 +163,7 @@
             --brand-text: #F4F2FF;
 
             --glass-bg: rgba(23, 16, 41, 0.62);
-            --glass-border: rgba(139, 92, 246, 0.20);
             --input-bg: rgba(8, 6, 16, 0.55);
-            --input-border: rgba(139, 92, 246, 0.28);
             --table-header-bg: #1A1330;
 
             --card-glass-bg: linear-gradient(165deg, rgba(60, 48, 92, 0.50) 0%, rgba(23, 16, 41, 0.38) 100%);
@@ -228,19 +209,8 @@
             --form-placeholder: #6B6190;
             --form-disabled: #120D22;
 
-            --cal-bg: #1A1330;
-            --cal-text: #F4F2FF;
-            --cal-border: #342A54;
-            --cal-hover: #271C42;
-            --cal-selected: #8B5CF6;
-            --cal-selected-text: #FFFFFF;
-            --cal-today: #8B5CF630;
-
-            --menu-card-bg: rgba(23, 16, 41, 0.70);
-            --menu-card-border: rgba(139, 92, 246, 0.18);
-            --menu-card-shadow: rgba(0, 0, 0, 0.40);
-            --menu-card-hover-border: #8B5CF6;
-            --menu-icon-bg: rgba(139, 92, 246, 0.18);
+            --nav-active-bg: #8B5CF6;
+            --nav-active-text: #FFFFFF;
         }
 
         * { box-sizing: border-box; }
@@ -257,32 +227,15 @@
             position: relative;
             z-index: 1;
         }
-        #login-page {
-            z-index: 50;
-        }
-
-        /* ============================================================ */
-        /* KEY FIX: Login page langsung hidden kalo ada session */
-        /* ============================================================ */
-        #login-page.hidden-early {
-            display: none !important;
-        }
-        #main-app.show {
-            display: flex !important;
-        }
-        #main-app {
-            display: none;
-        }
+        #login-page { z-index: 50; }
+        #login-page.hidden-early { display: none !important; }
+        #main-app.show { display: flex !important; }
+        #main-app { display: none; }
 
         @keyframes auroraDrift {
             0% { background-position: 0% 0%, 100% 0%, 80% 100%, 0% 100%; }
             50% { background-position: 8% 6%, 92% 8%, 75% 92%, 8% 92%; }
             100% { background-position: 0% 10%, 100% 0%, 85% 100%, 0% 95%; }
-        }
-        @keyframes auroraDriftNarrow {
-            0% { background-position: 0% 0%, 100% 100%; }
-            50% { background-position: 16% 10%, 84% 90%; }
-            100% { background-position: 0% 8%, 100% 92%; }
         }
 
         .aurora-surface {
@@ -294,16 +247,6 @@
             background-size: 160% 160%;
             background-repeat: no-repeat;
             animation: auroraDrift 26s ease-in-out infinite alternate;
-            transition: background-image 0.4s ease;
-        }
-        .aurora-sidebar {
-            background-image:
-                radial-gradient(ellipse 70% 30% at 30% 8%, var(--aurora-1) 0%, transparent 65%),
-                radial-gradient(ellipse 65% 32% at 70% 96%, var(--aurora-3) 0%, transparent 60%);
-            background-size: 140% 140%;
-            background-repeat: no-repeat;
-            animation: auroraDriftNarrow 20s ease-in-out infinite alternate;
-            animation-delay: -6s;
             transition: background-image 0.4s ease;
         }
 
@@ -334,6 +277,13 @@
             opacity: 0.9;
         }
 
+        .header-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
         .gradient-text {
             background: linear-gradient(120deg, var(--brand-primary) 0%, var(--brand-secondary) 35%, var(--brand-accent) 70%, var(--brand-primary) 100%);
             background-size: 300% auto;
@@ -342,20 +292,23 @@
             background-clip: text;
             animation: gradientShift 6s ease-in-out infinite;
         }
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+        @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
         .stat-card { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--brand-primary);
-            box-shadow: 0 16px 40px var(--brand-glow-strong), inset 0 1px 0 var(--card-glass-highlight), inset 0 0 0 1px var(--card-glass-border-soft) !important;
-        }
+        .stat-card:hover { transform: translateY(-4px); border-color: var(--brand-primary); box-shadow: 0 16px 40px var(--brand-glow-strong), inset 0 1px 0 var(--card-glass-highlight), inset 0 0 0 1px var(--card-glass-border-soft) !important; }
 
-        .nav-item { position: relative; transition: all 0.25s ease; }
-        .nav-item.active { background: var(--brand-glow); color: var(--brand-text); }
+        /* Nav Item Styles for Header */
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--brand-muted);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+        .nav-btn:hover { color: var(--brand-text); background: var(--brand-glow); }
+        .nav-btn.active { color: var(--nav-active-text); background: var(--nav-active-bg); box-shadow: 0 4px 12px var(--brand-glow-strong); }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 50%, var(--brand-primary) 100%);
@@ -363,21 +316,11 @@
             background-position: 0% 50%;
             transition: all 0.4s ease;
         }
-        .btn-primary:hover {
-            transform: translateY(-2px) scale(1.015);
-            background-position: 100% 50%;
-            box-shadow: 0 10px 32px var(--brand-glow-strong);
-        }
+        .btn-primary:hover { transform: translateY(-2px) scale(1.015); background-position: 100% 50%; box-shadow: 0 10px 32px var(--brand-glow-strong); }
         .btn-primary:active { transform: translateY(0) scale(0.99); }
 
-        .btn-outline {
-            border: 1px solid var(--glass-border);
-            transition: all 0.25s ease;
-        }
-        .btn-outline:hover {
-            border-color: var(--brand-primary);
-            background: var(--brand-glow);
-        }
+        .btn-outline { border: 1px solid var(--glass-border); transition: all 0.25s ease; }
+        .btn-outline:hover { border-color: var(--brand-primary); background: var(--brand-glow); }
 
         .input-modern {
             background: var(--form-bg);
@@ -393,94 +336,58 @@
             -webkit-appearance: auto;
             font-family: 'Inter', sans-serif;
         }
-        .input-modern:focus {
-            border-color: var(--form-focus-border);
-            box-shadow: 0 0 0 3px var(--form-focus-shadow);
-            outline: none;
-        }
+        .input-modern:focus { border-color: var(--form-focus-border); box-shadow: 0 0 0 3px var(--form-focus-shadow); outline: none; }
         .input-modern::placeholder { color: var(--form-placeholder); font-weight: 400; }
 
-        select.input-modern {
+        /* PERFECT DROPDOWN STYLING */
+        select.input-modern,
+        select.item-select,
+        #heatmap-month-select,
+        #heatmap-year-select,
+        #prompt-month,
+        #prompt-year,
+        #new-user-role {
+            background-color: var(--form-bg) !important;
+            color: var(--form-text) !important;
+            border: 1px solid var(--form-border);
+            border-radius: 0.75rem;
+            font-weight: 600;
             appearance: none;
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236D5DFC' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 1rem center;
             background-size: 12px 8px;
-            padding-right: 2.5rem;
-            cursor: pointer;
-        }
-        select.input-modern:focus {
-            border-color: var(--form-focus-border);
-            box-shadow: 0 0 0 3px var(--form-focus-shadow);
-            outline: none;
-        }
-
-        select.item-select {
-            background-color: var(--form-bg);
-            color: var(--form-text);
-            border: 1px solid var(--form-border);
-            border-radius: 0.75rem;
-            padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            min-width: 0;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236D5DFC' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.6rem center;
-            background-size: 10px 7px;
             transition: all 0.25s ease;
             font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
         }
-        select.item-select:focus {
-            border-color: var(--form-focus-border);
-            box-shadow: 0 0 0 3px var(--form-focus-shadow);
+        
+        select.item-select {
+            padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            background-position: right 0.6rem center;
+            background-size: 10px 7px;
+        }
+        
+        #heatmap-month-select, #heatmap-year-select {
+            padding: 0.35rem 2rem 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            background-position: right 0.6rem center;
+            background-size: 10px 7px;
+        }
+
+        select:focus {
+            border-color: var(--form-focus-border) !important;
+            box-shadow: 0 0 0 3px var(--form-focus-shadow) !important;
             outline: none;
         }
-
-        input.input-modern[type="date"]::-webkit-calendar-picker-indicator {
-            filter: var(--cal-icon-filter, invert(0.35) sepia(1) saturate(3) hue-rotate(220deg));
-            opacity: 0.7;
-            cursor: pointer;
-            padding: 0.25rem;
-            transition: opacity 0.2s;
-        }
-        input.input-modern[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
-        [data-theme="dark"] input.input-modern[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(0.7) sepia(1) saturate(2) hue-rotate(220deg);
-            opacity: 0.8;
-        }
-        [data-theme="light"] input.input-modern[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(0.3) sepia(1) saturate(3) hue-rotate(220deg);
-            opacity: 0.7;
-        }
-
-        ::-webkit-calendar-picker {
-            background: var(--cal-bg) !important;
-            color: var(--cal-text) !important;
-            border: 1px solid var(--cal-border) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 12px 40px var(--card-glass-shadow) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            font-family: 'Inter', sans-serif !important;
-            padding: 0.5rem !important;
-        }
-        ::-webkit-calendar-picker .day {
-            color: var(--cal-text) !important;
-            border-radius: 6px !important;
-            transition: background 0.15s !important;
-        }
-        ::-webkit-calendar-picker .day:hover { background: var(--cal-hover) !important; }
-        ::-webkit-calendar-picker .day.selected {
-            background: var(--cal-selected) !important;
-            color: var(--cal-selected-text) !important;
-        }
-        ::-webkit-calendar-picker .day.today {
-            background: var(--cal-today) !important;
-            font-weight: 700 !important;
+        
+        select option {
+            background-color: var(--form-bg);
+            color: var(--form-text);
+            font-weight: 500;
         }
 
         .live-badge {
@@ -498,6 +405,7 @@
             color: #DC2626;
             transition: all 0.3s ease;
             box-shadow: 0 0 12px rgba(220, 38, 38, 0.08);
+            white-space: nowrap;
         }
         [data-theme="dark"] .live-badge {
             background: rgba(220, 38, 38, 0.14);
@@ -515,82 +423,9 @@
             animation: pulseDot 1.6s ease-in-out infinite;
             flex-shrink: 0;
         }
-        [data-theme="dark"] .live-dot {
-            background: #F87171;
-            box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
-        }
-        @keyframes pulseDot {
-            0%, 100% { transform: scale(0.92); opacity: 0.7; box-shadow: 0 0 4px rgba(220, 38, 38, 0.3); }
-            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 18px rgba(220, 38, 38, 0.7); }
-        }
+        [data-theme="dark"] .live-dot { background: #F87171; box-shadow: 0 0 10px rgba(220, 38, 38, 0.6); }
         .live-text { animation: pulseLiveText 2.4s ease-in-out infinite; font-weight: 800; }
-        @keyframes pulseLiveText {
-            0%, 100% { opacity: 0.85; }
-            50% { opacity: 1; }
-        }
-
-        .menu-card {
-            background: var(--menu-card-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--menu-card-border);
-            box-shadow: 0 8px 32px var(--menu-card-shadow);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            border-radius: 1.5rem;
-            padding: 2.5rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            min-height: 220px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .menu-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            border-color: var(--menu-card-hover-border);
-            box-shadow: 0 24px 60px var(--brand-glow-strong);
-        }
-        .menu-card:active { transform: scale(0.97); }
-        .menu-card .menu-icon {
-            font-size: 3.5rem;
-            line-height: 1;
-            margin-bottom: 1rem;
-            display: inline-block;
-            background: var(--menu-icon-bg);
-            padding: 1rem;
-            border-radius: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        .menu-card:hover .menu-icon { transform: scale(1.08) rotate(-3deg); }
-        .menu-card .menu-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--brand-text);
-            letter-spacing: -0.01em;
-        }
-        .menu-card .menu-desc {
-            font-size: 0.8rem;
-            color: var(--brand-muted);
-            margin-top: 0.5rem;
-            font-weight: 500;
-        }
-        .menu-card .menu-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 0.55rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            background: var(--brand-primary);
-            color: white;
-            opacity: 0.9;
-        }
+        @keyframes pulseLiveText { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
 
         .login-bg {
             position: fixed;
@@ -662,78 +497,24 @@
 
         @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 
-        .sidebar-link { position: relative; overflow: hidden; transition: all 0.2s ease; }
-        .sidebar-link:hover::before { opacity: 1; }
-        .sidebar-link.active { background: var(--brand-glow); color: var(--brand-text); }
-
         .view-transition { animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes scaleIn { 0% { opacity: 0; transform: scale(0.92); } 100% { opacity: 1; transform: scale(1); } }
 
-        .table-wrap::-webkit-scrollbar { height: 4px; }
-        .table-wrap::-webkit-scrollbar-thumb { background: var(--brand-secondary); border-radius: 4px; }
-
-        .heatmap-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
+        .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
         .heatmap-cell {
-            aspect-ratio: 1;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--brand-bg);
-            transition: all 0.2s ease;
-            cursor: default;
-            min-height: 32px;
+            aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 600; color: var(--brand-bg); transition: all 0.2s ease; cursor: default; min-height: 32px;
         }
         [data-theme="dark"] .heatmap-cell { color: #000; }
         .heatmap-cell:hover { transform: scale(1.1); z-index: 2; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); }
-        .heatmap-cell-empty {
-            background: var(--brand-surface);
-            border: 1px dashed var(--glass-border);
-            color: var(--brand-muted);
-        }
-        .heatmap-label {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--brand-muted);
-            text-align: center;
-            font-weight: 600;
-        }
+        .heatmap-cell-empty { background: var(--brand-surface); border: 1px dashed var(--glass-border); color: var(--brand-muted); }
+        .heatmap-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--brand-muted); text-align: center; font-weight: 600; }
 
         .badge-status { transition: all 0.2s ease; }
         .badge-status:hover { transform: scale(1.05); }
 
         .table-row { transition: all 0.2s ease; }
         .table-row:hover { background: var(--brand-glow); }
-
-        .icon-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--brand-surface);
-            border: 1px solid var(--glass-border);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            color: var(--brand-muted);
-            font-size: 18px;
-            line-height: 1;
-        }
-        .icon-btn:hover {
-            background: var(--brand-glow);
-            border-color: var(--brand-primary);
-            color: var(--brand-text);
-            transform: scale(1.05);
-        }
-        .icon-sm { font-size: 14px; width: 28px; height: 28px; border-radius: 8px; }
 
         .card-hover { transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
         .card-hover:hover {
@@ -742,52 +523,20 @@
             box-shadow: 0 24px 60px var(--brand-glow-strong), inset 0 1px 0 var(--card-glass-highlight), inset 0 0 0 1px var(--card-glass-border-soft) !important;
         }
 
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: var(--brand-surface); }
-        ::-webkit-scrollbar-thumb { background: var(--brand-primary); border-radius: 8px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary-light); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--brand-muted); border-radius: 8px; opacity: 0.5; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        #heatmap-month-select,
-        #heatmap-year-select,
-        #prompt-month,
-        #prompt-year,
-        #new-user-role {
-            background-color: var(--form-bg);
-            color: var(--form-text);
-            border: 1px solid var(--form-border);
-            border-radius: 0.75rem;
-            padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236D5DFC' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.7rem center;
-            background-size: 10px 7px;
-            transition: all 0.25s ease;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-        }
-        #heatmap-month-select:focus,
-        #heatmap-year-select:focus,
-        #prompt-month:focus,
-        #prompt-year:focus,
-        #new-user-role:focus {
-            border-color: var(--form-focus-border);
-            box-shadow: 0 0 0 3px var(--form-focus-shadow);
-            outline: none;
-        }
     </style>
 </head>
 <body>
 
     <!-- ============================================================ -->
-    <!-- LOGIN PAGE — hidden-early kalo ada session -->
+    <!-- LOGIN PAGE -->
     <!-- ============================================================ -->
-    <div id="login-page" class="login-bg px-4 <?php echo isset($_SESSION['valid']) ? 'hidden-early' : ''; ?>">
+    <div id="login-page" class="login-bg px-4">
         <div class="login-cursor-glow" id="login-cursor-glow"></div>
         <div class="login-orb login-orb-1"></div>
         <div class="login-orb login-orb-2"></div>
@@ -796,9 +545,7 @@
 
         <div class="relative w-full max-w-md p-8 rounded-3xl glass login-card login-card-border shadow-2xl">
             <div class="text-center mb-8">
-                <div class="login-logo inline-flex items-center justify-center w-16 h-16 rounded-2xl text-white text-2xl font-extrabold shadow-lg mb-4">
-                    AS
-                </div>
+                <div class="login-logo inline-flex items-center justify-center w-16 h-16 rounded-2xl text-white text-2xl font-extrabold shadow-lg mb-4">AS</div>
                 <h1 class="text-2xl font-extrabold tracking-tight gradient-text">Logistics Tracker</h1>
                 <p class="text-sm text-brand-muted mt-1 font-medium">Binus Alam Sutera · Event Management</p>
             </div>
@@ -818,7 +565,6 @@
                 <button type="submit" class="w-full py-3.5 mt-2 rounded-xl btn-primary text-white font-bold tracking-wide shadow-lg transition hover:opacity-90">
                     Sign In
                 </button>
-
                 <div class="flex items-center justify-center space-x-3 pt-3">
                     <button type="button" onclick="toggleTheme()" class="px-4 py-2 rounded-xl bg-brand-surface border border-brand-border text-xs font-bold text-brand-text transition hover:bg-brand-glow shadow-sm">
                         <span id="login-theme-text">Dark</span>
@@ -834,97 +580,72 @@
     <!-- ============================================================ -->
     <!-- MAIN APP -->
     <!-- ============================================================ -->
-    <div id="main-app" class="flex-1 h-screen flex flex-col md:flex-row overflow-hidden bg-brand-bg">
-
-        <!-- Mobile Header -->
-        <div class="md:hidden flex items-center justify-between glass px-5 py-3.5 border-b border-brand-border z-20">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center font-extrabold text-white text-xs shadow-lg">AS</div>
-                <h2 class="text-sm font-bold text-brand-text">Alsut Logistics</h2>
-            </div>
-            <button onclick="toggleMobileMenu()" class="icon-btn icon-sm" aria-label="Menu">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
-        </div>
-
-        <!-- SIDEBAR -->
-        <nav id="sidebar" class="fixed md:static inset-y-0 left-0 w-[270px] bg-brand-surface border-r border-brand-border transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-30 flex flex-col aurora-sidebar">
-
-            <div class="hidden md:flex items-center space-x-3 px-6 py-5 border-b border-brand-border">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center font-extrabold text-white shadow-lg">AS</div>
-                <div>
-                    <h2 class="text-sm font-bold text-brand-text leading-tight">Alsut Logistics</h2>
-                    <p class="text-[10px] text-brand-muted uppercase tracking-wider mt-0.5">Event Management</p>
+    <div id="main-app" class="flex-col h-screen overflow-hidden bg-brand-bg aurora-surface">
+        
+        <!-- ============================================================ -->
+        <!-- HEADER NAVBAR -->
+        <!-- ============================================================ -->
+        <header class="flex-none header-glass z-30 w-full sticky top-0 px-4 py-3 lg:px-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                
+                <!-- Kiri: Logo & Title -->
+                <div class="flex items-center justify-between md:justify-start gap-4">
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="navigate('dashboard')">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center font-extrabold text-white shadow-lg">AS</div>
+                        <div>
+                            <h1 class="text-sm font-bold text-brand-text leading-tight">Alsut Logistics</h1>
+                            <div class="flex items-center space-x-2 mt-0.5">
+                                <span class="text-[10px] text-brand-muted uppercase tracking-wider hidden sm:inline-block">Event Management</span>
+                                <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border border-status-info-border text-status-info-text" id="user-role-badge">Role</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Right Area (Theme/Lang/Logout on mobile) -->
+                    <div class="flex items-center gap-2 md:hidden">
+                        <span class="live-badge scale-90 origin-right"><span class="live-dot"></span><span class="live-text">LIVE</span></span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="px-5 py-4 border-b border-brand-border bg-brand-glow">
-                <p class="text-[10px] font-semibold text-brand-muted uppercase tracking-wider mb-1">Status</p>
-                <p class="text-sm font-bold text-brand-text" id="user-display-name">User</p>
-                <span class="inline-flex items-center mt-1.5 text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full border" id="user-role-badge">Role</span>
-            </div>
+                <!-- Tengah: Navigation Menu -->
+                <nav class="flex items-center overflow-x-auto no-scrollbar gap-1 py-1 md:py-0 w-full md:w-auto md:flex-1 md:justify-center">
+                    <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn active">Dashboard</button>
+                    <button onclick="navigate('database')" id="nav-database" class="nav-btn">Data & Form</button>
+                    <button onclick="navigate('active-loans')" id="nav-active-loans" class="nav-btn">Active</button>
+                    <button onclick="navigate('tools')" id="nav-tools" class="nav-btn">Tools</button>
+                    <button onclick="navigate('history')" id="nav-history" class="nav-btn">History</button>
+                    <button onclick="navigate('settings')" id="nav-settings" class="nav-btn admin-only">Settings</button>
+                </nav>
 
-            <div class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-                <a href="index.html" class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-text transition-all duration-200">
-                    <span class="mr-3 text-lg">⌂</span> <span>Main Menu</span>
-                </a>
-
-                <div class="my-2 border-t border-brand-border/40"></div>
-
-                <button onclick="navigate('dashboard')" id="nav-dashboard" class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-text transition-all duration-200 active">
-                    <span class="mr-3 text-lg">≡</span> <span>Dashboard</span>
-                </button>
-                <button onclick="navigate('database')" id="nav-database" class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-text transition-all duration-200">
-                    <span class="mr-3 text-lg">⊞</span> <span>Data & Form</span>
-                </button>
-                <button onclick="navigate('active-loans')" id="nav-active-loans" class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-text transition-all duration-200">
-                    <span class="mr-3 text-lg">◉</span> <span>Active Tickets</span>
-                </button>
-                <button onclick="navigate('tools')" id="nav-tools" class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-text transition-all duration-200">
-                    <span class="mr-3 text-lg">⌕</span> <span>Search & Export</span>
-                </button>
-                <button onclick="navigate('history')" id="nav-history" class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-text transition-all duration-200">
-                    <span class="mr-3 text-lg">↻</span> <span>History</span>
-                </button>
-                <div class="admin-only mt-3 pt-3 border-t border-brand-border">
-                    <button onclick="navigate('settings')" id="nav-settings" class="sidebar-link w-full flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-muted hover:text-brand-text transition-all duration-200">
-                        <span class="mr-3 text-lg">⚙</span> <span>Settings</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="p-4 border-t border-brand-border space-y-2">
-                <div class="flex space-x-2">
-                    <button onclick="toggleTheme()" class="flex-1 flex items-center justify-center px-3 py-2 rounded-xl bg-brand-surface border border-brand-border text-xs font-bold text-brand-text transition hover:border-brand-primary">
+                <!-- Kanan: Controls & User -->
+                <div class="flex items-center justify-end gap-2 flex-shrink-0 border-t border-brand-border md:border-0 pt-2 md:pt-0 mt-1 md:mt-0">
+                    <span class="live-badge hidden md:inline-flex mr-2"><span class="live-dot"></span><span class="live-text">LIVE</span></span>
+                    <span class="text-xs font-bold text-brand-text hidden lg:inline-block mr-2 truncate max-w-[100px]" id="user-display-name">User</span>
+                    
+                    <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-brand-border bg-brand-surface text-brand-text hover:bg-brand-glow transition shadow-sm">
                         <span id="theme-text">Dark</span>
                     </button>
-                    <button onclick="toggleLanguage()" class="flex-1 flex items-center justify-center px-3 py-2 rounded-xl bg-brand-surface border border-brand-border text-xs font-bold text-brand-text transition hover:border-brand-primary">
+                    <button onclick="toggleLanguage()" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-brand-border bg-brand-surface text-brand-text hover:bg-brand-glow transition shadow-sm">
                         <span id="lang-text">ENG</span>
                     </button>
+                    <button onclick="handleLogout()" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-status-danger-border bg-status-danger-bg text-status-danger-text hover:opacity-80 transition shadow-sm flex items-center">
+                        <span class="hidden sm:inline-block mr-1">Logout</span> ⤴
+                    </button>
                 </div>
-                <button onclick="handleLogout()" class="w-full flex items-center justify-center px-4 py-2.5 rounded-xl bg-status-danger-bg hover:bg-status-danger-border border border-status-danger-border text-sm font-semibold text-status-danger-text transition-all duration-200">
-                    <span class="mr-2">⤴</span> <span>Sign Out</span>
-                </button>
             </div>
-        </nav>
+        </header>
 
-        <!-- MAIN CONTENT -->
-        <main class="flex-1 overflow-y-auto relative w-full bg-brand-bg aurora-surface">
-            <div id="mobile-overlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/70 z-20 hidden md:hidden"></div>
-
-            <div class="p-4 sm:p-6 md:p-8 w-full max-w-7xl mx-auto space-y-8 pb-24">
+        <!-- ============================================================ -->
+        <!-- MAIN CONTENT AREA -->
+        <!-- ============================================================ -->
+        <main class="flex-1 overflow-y-auto relative w-full px-4 sm:px-6 md:px-8 py-6 pb-24">
+            <div class="max-w-7xl mx-auto space-y-8">
 
                 <!-- VIEW: DASHBOARD -->
                 <div id="view-dashboard" class="view-transition space-y-7">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text">Executive Dashboard</h2>
-                            <p class="text-sm text-brand-muted mt-0.5">Complete logistics performance analytics</p>
-                        </div>
-                        <span class="live-badge">
-                            <span class="live-dot"></span>
-                            <span class="live-text">LIVE</span>
-                        </span>
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text">Executive Dashboard</h2>
+                        <p class="text-sm text-brand-muted mt-0.5">Complete logistics performance analytics</p>
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
@@ -983,11 +704,11 @@
                                 <span class="ml-2 text-[10px] font-normal text-brand-muted">lighter = busier</span>
                             </h3>
                             <div class="flex items-center space-x-2">
-                                <select id="heatmap-month-select" class="px-2 py-1 text-xs rounded-lg font-semibold text-brand-text" style="background:var(--form-bg);color:var(--form-text);border:1px solid var(--form-border);" onchange="renderHeatmap()"></select>
-                                <select id="heatmap-year-select" class="px-2 py-1 text-xs rounded-lg font-semibold text-brand-text" style="background:var(--form-bg);color:var(--form-text);border:1px solid var(--form-border);" onchange="renderHeatmap()"></select>
+                                <select id="heatmap-month-select" class="px-2 py-1 text-xs rounded-lg font-semibold text-brand-text" onchange="renderHeatmap()"></select>
+                                <select id="heatmap-year-select" class="px-2 py-1 text-xs rounded-lg font-semibold text-brand-text" onchange="renderHeatmap()"></select>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto no-scrollbar">
                             <div id="heatmap-container" class="min-w-[320px]">
                                 <div class="heatmap-grid mb-1" id="heatmap-header">
                                     <div class="heatmap-label">Mon</div><div class="heatmap-label">Tue</div>
@@ -1009,7 +730,7 @@
                     </div>
 
                     <div class="flex flex-col xl:flex-row gap-6">
-                        <div class="w-full xl:w-[420px] shrink-0 glass rounded-2xl p-6 shadow-lg admin-only">
+                        <div class="w-full xl:w-[400px] shrink-0 glass rounded-2xl p-5 shadow-lg admin-only">
                             <div class="flex items-center justify-between mb-5">
                                 <h3 class="text-md font-bold text-brand-text" id="form-title">New Loan Entry</h3>
                                 <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-brand-muted hover:text-brand-text px-3 py-1.5 rounded-lg bg-brand-surface border border-brand-border transition">Cancel Edit</button>
@@ -1052,27 +773,27 @@
                             </form>
                         </div>
 
-                        <div class="w-full xl:w-[420px] shrink-0 glass rounded-2xl p-6 shadow-lg viewer-only flex-col items-center justify-center text-center hidden">
+                        <div class="w-full xl:w-[400px] shrink-0 glass rounded-2xl p-6 shadow-lg viewer-only flex-col items-center justify-center text-center hidden">
                             <span class="text-5xl mb-4 block opacity-60">🔒</span>
                             <h3 class="text-lg font-bold text-brand-text mb-2">View-Only Access</h3>
                             <p class="text-sm text-brand-muted leading-relaxed">You are logged in as a Viewer. Adding, editing, or deleting records is restricted.</p>
                         </div>
 
-                        <div class="flex-1 glass rounded-2xl shadow-lg flex flex-col min-h-[500px] overflow-hidden">
+                        <div class="flex-1 glass rounded-2xl shadow-lg flex flex-col min-h-[500px] overflow-hidden w-full">
                             <div class="p-4 border-b border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-3" style="background: var(--table-header-bg);">
                                 <h3 class="text-md font-bold text-brand-text">Database Summary</h3>
                                 <input type="text" id="table-search" oninput="renderTableResetPage()" class="w-full sm:w-64 px-4 py-2.5 rounded-xl input-modern text-brand-text text-sm" placeholder="Quick filter ..." />
                             </div>
-                            <div class="flex-1 overflow-auto table-wrap">
-                                <table class="w-full text-left border-collapse min-w-[800px]">
+                            <!-- TABEL TANPA SCROLL HORIZONTAL (Responsive Action Column) -->
+                            <div class="flex-1 overflow-y-auto no-scrollbar">
+                                <table class="w-full text-left border-collapse table-auto">
                                     <thead class="sticky top-0 z-10 border-b border-brand-border" style="background: var(--table-header-bg);">
                                         <tr class="text-[10px] font-extrabold uppercase text-brand-muted tracking-wider">
-                                            <th class="py-4 px-5">Date</th>
-                                            <th class="py-4 px-5">Ticket</th>
-                                            <th class="py-4 px-5">Event</th>
-                                            <th class="py-4 px-5">Items</th>
-                                            <th class="py-4 px-5 text-center">Status</th>
-                                            <th class="py-4 px-5 text-right admin-only">Action</th>
+                                            <th class="py-3 px-3 w-20 sm:w-28">Date</th>
+                                            <th class="py-3 px-3 w-20 sm:w-28">Ticket</th>
+                                            <th class="py-3 px-3">Event & Items</th>
+                                            <th class="py-3 px-3 w-24 text-center hidden sm:table-cell">Status</th>
+                                            <th class="py-3 px-3 w-20 sm:w-24 text-right admin-only">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="loan-table-body" class="divide-y divide-brand-border/40 text-sm"></tbody>
@@ -1277,7 +998,7 @@
     <!-- ============================================================ -->
     <script>
         // ================================================================
-        // PREVENT FLASH: Apply early hidden if session exists
+        // PREVENT FLASH
         // ================================================================
         (function() {
             if (window.__SESSION_VALID) {
@@ -1285,7 +1006,6 @@
                 if (loginPage) loginPage.classList.add('hidden-early');
                 const mainApp = document.getElementById('main-app');
                 if (mainApp) mainApp.classList.add('show');
-                // We'll apply the user later in window.onload
             }
         })();
 
@@ -1316,23 +1036,16 @@
         ].sort();
 
         let trackingRecords = [];
-        try { trackingRecords = JSON.parse(localStorage.getItem(DB_KEY)) || []; } catch (e) { localStorage.removeItem(
-            DB_KEY); }
+        try { trackingRecords = JSON.parse(localStorage.getItem(DB_KEY)) || []; } catch (e) { localStorage.removeItem(DB_KEY); }
 
         let appUsers = [];
-        try { appUsers = JSON.parse(localStorage.getItem(USER_DB_KEY)); if (!Array.isArray(appUsers)) throw new Error(); } catch (
-            e) { appUsers = []; }
+        try { appUsers = JSON.parse(localStorage.getItem(USER_DB_KEY)); if (!Array.isArray(appUsers)) throw new Error(); } catch (e) { appUsers = []; }
 
-        // Seed users
         const rootAdmin = appUsers.find(u => u.username === 'sewong');
-        if (!rootAdmin) { appUsers.push({ username: 'sewong', password: '_pR0t3<s3<uR3', role: 'admin' }); } else { rootAdmin
-                .password = '_pR0t3<s3<uR3'; }
-        if (!appUsers.find(u => u.username === 'alsut_view')) { appUsers.push({ username: 'alsut_view', password: '123',
-                role: 'viewer' }); }
+        if (!rootAdmin) { appUsers.push({ username: 'sewong', password: '_pR0t3<s3<uR3', role: 'admin' }); } else { rootAdmin.password = '_pR0t3<s3<uR3'; }
+        if (!appUsers.find(u => u.username === 'alsut_view')) { appUsers.push({ username: 'alsut_view', password: '123', role: 'viewer' }); }
         const csmViewer = appUsers.find(u => u.username === 'sdp.csm.alsut');
-        if (!csmViewer) { appUsers.push({ username: 'sdp.csm.alsut', password: '1dua3333V6tujuh', role: 'viewer' }); } else { csmViewer
-                .password = '1dua3333V6tujuh';
-            csmViewer.role = 'viewer'; }
+        if (!csmViewer) { appUsers.push({ username: 'sdp.csm.alsut', password: '1dua3333V6tujuh', role: 'viewer' }); } else { csmViewer.password = '1dua3333V6tujuh'; csmViewer.role = 'viewer'; }
         localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
 
         let chartTop10Instance, chartBottom10Instance, chartTrendInstance, chartTopEventsInstance, chartStatusInstance;
@@ -1342,31 +1055,16 @@
         // ================================================================
         const translations = {
             en: {
-                theme_dark: 'Dark',
-                theme_light: 'Light',
-                opt_viewer: 'View Only',
-                opt_admin: 'Admin',
-                status_borrowed: 'Borrowed',
-                status_returned: 'Returned',
-                chart_borrowed: 'Borrowed',
-                chart_returned: 'Returned',
-                badge_active: 'Active',
-                badge_overdue: 'Overdue'
+                theme_dark: 'Dark', theme_light: 'Light', opt_viewer: 'View Only', opt_admin: 'Admin',
+                status_borrowed: 'Borrowed', status_returned: 'Returned', chart_borrowed: 'Borrowed', chart_returned: 'Returned',
+                badge_active: 'Active', badge_overdue: 'Overdue'
             },
             id: {
-                theme_dark: 'Gelap',
-                theme_light: 'Terang',
-                opt_viewer: 'Hanya Lihat',
-                opt_admin: 'Admin',
-                status_borrowed: 'Dipinjam',
-                status_returned: 'Kembali',
-                chart_borrowed: 'Dipinjam',
-                chart_returned: 'Kembali',
-                badge_active: 'Aktif',
-                badge_overdue: 'Terlambat'
+                theme_dark: 'Gelap', theme_light: 'Terang', opt_viewer: 'Hanya Lihat', opt_admin: 'Admin',
+                status_borrowed: 'Dipinjam', status_returned: 'Kembali', chart_borrowed: 'Dipinjam', chart_returned: 'Kembali',
+                badge_active: 'Aktif', badge_overdue: 'Terlambat'
             }
         };
-
         function tk(key) { return translations[currentLang][key] || key; }
 
         // ================================================================
@@ -1377,11 +1075,12 @@
             const currentTheme = html.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             html.setAttribute('data-theme', newTheme);
+            html.style.colorScheme = newTheme; // Force dropdown/scroll styling
+            
             const themeLabel = newTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
             document.getElementById('theme-text').innerText = themeLabel;
             document.getElementById('login-theme-text').innerText = themeLabel;
             localStorage.setItem('binus_theme', newTheme);
-            refreshSelectArrows();
             if (currentUser) renderDashboard();
         }
 
@@ -1389,56 +1088,24 @@
             currentLang = currentLang === 'en' ? 'id' : 'en';
             document.getElementById('lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
             document.getElementById('login-lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
+            
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const themeLabel = currentTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
             document.getElementById('theme-text').innerText = themeLabel;
             document.getElementById('login-theme-text').innerText = themeLabel;
+            
             localStorage.setItem('binus_lang', currentLang);
-
-            // Update status dropdowns
-            const optB = document.getElementById('opt-dipinjam');
-            if (optB) optB.innerText = tk('status_borrowed');
-            const optR = document.getElementById('opt-kembali');
-            if (optR) optR.innerText = tk('status_returned');
+            const optB = document.getElementById('opt-dipinjam'); if (optB) optB.innerText = tk('status_borrowed');
+            const optR = document.getElementById('opt-kembali'); if (optR) optR.innerText = tk('status_returned');
 
             setupHeatmapSelectors();
             if (currentUser) {
-                renderDashboard();
-                renderTable();
-                renderActiveLoans();
-                renderHistory();
+                renderDashboard(); renderTable(); renderActiveLoans(); renderHistory();
             }
         }
 
-        function refreshSelectArrows() {
-            const arrowColor = getComputedStyle(document.documentElement).getPropertyValue('--form-select-arrow').trim() ||
-                '#6D5DFC';
-            const svg =
-                `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='${encodeURIComponent(arrowColor)}' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`;
-            const selects = document.querySelectorAll(
-                'select.input-modern, select.item-select, #heatmap-month-select, #heatmap-year-select, #prompt-month, #prompt-year, #new-user-role'
-                );
-            selects.forEach(el => {
-                el.style.backgroundImage = svg;
-                el.style.backgroundRepeat = 'no-repeat';
-                el.style.backgroundPosition = 'right 1rem center';
-                el.style.backgroundSize = '12px 8px';
-            });
-            const smallSelects = document.querySelectorAll(
-                '#heatmap-month-select, #heatmap-year-select, #prompt-month, #prompt-year, #new-user-role');
-            smallSelects.forEach(el => {
-                el.style.backgroundPosition = 'right 0.7rem center';
-                el.style.backgroundSize = '10px 7px';
-            });
-            const itemSelects = document.querySelectorAll('select.item-select');
-            itemSelects.forEach(el => {
-                el.style.backgroundPosition = 'right 0.6rem center';
-                el.style.backgroundSize = '10px 7px';
-            });
-        }
-
         // ================================================================
-        // LOGIN PAGE — cursor-reactive aurora
+        // LOGIN PAGE — CURSOR FX
         // ================================================================
         (function initLoginAuroraInteraction() {
             const stage = document.getElementById('login-page');
@@ -1446,13 +1113,10 @@
             const orbs = stage.querySelectorAll('.login-orb');
             const glow = document.getElementById('login-cursor-glow');
             const depths = [26, 34, 20, 30];
-            let rafId = null,
-                px = 0.5,
-                py = 0.38;
+            let rafId = null, px = 0.5, py = 0.38;
 
             function apply() {
-                const nx = px - 0.5;
-                const ny = py - 0.5;
+                const nx = px - 0.5; const ny = py - 0.5;
                 orbs.forEach((orb, i) => {
                     const d = depths[i % depths.length];
                     orb.style.setProperty('--ox', (-nx * d).toFixed(1) + 'px');
@@ -1467,15 +1131,11 @@
 
             function onMove(clientX, clientY) {
                 if (window.innerWidth <= 0 || window.innerHeight <= 0) return;
-                px = clientX / window.innerWidth;
-                py = clientY / window.innerHeight;
+                px = clientX / window.innerWidth; py = clientY / window.innerHeight;
                 if (!rafId) rafId = requestAnimationFrame(apply);
             }
-
-            stage.addEventListener('mousemove', function(e) { onMove(e.clientX, e.clientY); });
-            stage.addEventListener('touchmove', function(e) {
-                if (e.touches && e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: true });
+            stage.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+            stage.addEventListener('touchmove', e => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
         })();
 
         // ================================================================
@@ -1485,13 +1145,9 @@
             e.preventDefault();
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value.trim();
-            const err = document.getElementById('login-error');
             const valid = appUsers.find(user => user.username === u && user.password === p);
-            if (valid) {
-                applyRole(valid);
-            } else {
-                err.classList.remove('hidden');
-            }
+            if (valid) applyRole(valid);
+            else document.getElementById('login-error').classList.remove('hidden');
         }
 
         function applyRole(userObj) {
@@ -1503,8 +1159,8 @@
             const badge = document.getElementById('user-role-badge');
             badge.innerText = isAdm ? tk('opt_admin') : tk('opt_viewer');
             badge.className = isAdm ?
-                'inline-flex items-center mt-1.5 text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full border border-status-success-border text-status-success-text' :
-                'inline-flex items-center mt-1.5 text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full border border-status-info-border text-status-info-text';
+                'text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border border-status-success-border text-status-success-text' :
+                'text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border border-status-info-border text-status-info-text';
 
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdm ? '' : 'none');
             document.querySelectorAll('.viewer-only').forEach(el => el.style.display = isAdm ? 'none' : 'flex');
@@ -1515,7 +1171,6 @@
 
             initFormItems();
             navigate('dashboard');
-            setTimeout(refreshSelectArrows, 200);
         }
 
         function handleLogout() {
@@ -1538,8 +1193,7 @@
                 const del = u.username !== 'sewong' ?
                     `<button onclick="deleteUser(${i})" class="text-status-danger-text hover:opacity-80 font-bold text-xs transition">Delete</button>` :
                     `<span class="text-xs text-brand-muted">Root</span>`;
-                tbody.innerHTML +=
-                    `<tr class="border-b border-brand-border/40 hover:bg-brand-glow transition"><td class="py-3 px-5 text-brand-text font-bold">${u.username}</td><td class="py-3 px-5 font-bold uppercase text-[10px] ${roleColor}">${roleText}</td><td class="py-3 px-5">${del}</td></tr>`;
+                tbody.innerHTML += `<tr class="border-b border-brand-border/40 hover:bg-brand-glow transition"><td class="py-3 px-5 text-brand-text font-bold">${u.username}</td><td class="py-3 px-5 font-bold uppercase text-[10px] ${roleColor}">${roleText}</td><td class="py-3 px-5">${del}</td></tr>`;
             });
         }
 
@@ -1551,58 +1205,43 @@
             if (appUsers.find(u => u.username === uname)) { alert('Username already exists!'); return; }
             appUsers.push({ username: uname, password: pass, role });
             localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
-            document.getElementById('new-user-name').value = '';
-            document.getElementById('new-user-pass').value = '';
-            renderUsers();
-            alert(`User ${uname} created successfully!`);
+            document.getElementById('new-user-name').value = ''; document.getElementById('new-user-pass').value = '';
+            renderUsers(); alert(`User ${uname} created successfully!`);
         }
 
         function deleteUser(index) {
-            if (confirm('Delete this user?')) { appUsers.splice(index, 1);
-                localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
-                renderUsers(); }
+            if (confirm('Delete this user?')) { appUsers.splice(index, 1); localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers)); renderUsers(); }
         }
 
         // ================================================================
-        // NAVIGATION
+        // NAVIGATION (HEADER BASED)
         // ================================================================
         function navigate(viewId) {
             ['dashboard', 'database', 'active-loans', 'tools', 'history', 'settings'].forEach(id => {
                 const el = document.getElementById('view-' + id);
                 if (el) el.classList.add('hidden');
                 const nav = document.getElementById('nav-' + id);
-                if (nav) { nav.classList.remove('active');
-                    nav.classList.remove('bg-brand-glow'); }
+                if (nav) nav.classList.remove('active');
             });
             const target = document.getElementById('view-' + viewId);
             if (target) target.classList.remove('hidden');
             const navBtn = document.getElementById('nav-' + viewId);
-            if (navBtn) { navBtn.classList.add('active');
-                navBtn.classList.add('bg-brand-glow'); }
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('mobile-overlay').classList.add('hidden');
+            if (navBtn) navBtn.classList.add('active');
+            
             if (viewId === 'dashboard') renderDashboard();
-            if (viewId === 'database') { currentPage = 1;
-                renderTable(); }
+            if (viewId === 'database') { currentPage = 1; renderTable(); }
             if (viewId === 'active-loans') renderActiveLoans();
             if (viewId === 'history') renderHistory();
-            setTimeout(refreshSelectArrows, 150);
-        }
-
-        function toggleMobileMenu() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('mobile-overlay').classList.toggle('hidden');
         }
 
         // ================================================================
-        // IMPORT EXCEL
+        // EXCEL IMPORT & EXPORT ... (Sama dengan script sebelumnya)
         // ================================================================
         function importExcel() {
             const fileInput = document.getElementById('import-file');
             const msg = document.getElementById('import-msg');
             if (!fileInput.files.length) { alert('Please select an Excel (.xlsx) file first!'); return; }
-            msg.classList.remove('hidden');
-            msg.innerText = '⏳ Reading file...';
+            msg.classList.remove('hidden'); msg.innerText = '⏳ Reading file...';
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -1613,46 +1252,24 @@
                         const ws = workbook.Sheets[sheetName];
                         const json = XLSX.utils.sheet_to_json(ws, { raw: false, dateNF: 'yyyy-mm-dd' });
                         json.forEach(row => {
-                            let ticket = row['Ticket Number'] || row['No Tiket'] || row['No. Tiket'] || row[
-                                'Ticket'];
+                            let ticket = row['Ticket Number'] || row['No Tiket'] || row['No. Tiket'] || row['Ticket'];
                             let dateStr = row['Date'] || row['Tanggal Event Selesai'] || row['Tanggal'];
-                            let event = row['Event Name'] || row['Nama Kegiatan'] || row['Event'] ||
-                                'Imported Event';
-                            let technician = row['IT technician'] || row['Teknisi'] || row['Technician'] ||
-                                '';
+                            let event = row['Event Name'] || row['Nama Kegiatan'] || row['Event'] || 'Imported Event';
                             if (ticket && dateStr) {
                                 let items = [];
                                 masterItemsList.forEach(itemName => {
-                                    let cell = row[itemName];
-                                    if (!cell && itemName === 'Acer PC') cell = row['PC ACER'];
-                                    if (cell && !isNaN(parseInt(cell))) {
-                                        let qty = parseInt(cell);
-                                        if (qty > 0) items.push({ name: itemName, qty });
-                                    }
+                                    let cell = row[itemName]; if (!cell && itemName === 'Acer PC') cell = row['PC ACER'];
+                                    if (cell && !isNaN(parseInt(cell))) { let qty = parseInt(cell); if (qty > 0) items.push({ name: itemName, qty }); }
                                 });
                                 if (items.length > 0) {
-                                    let existing = trackingRecords.findIndex(r => String(r.ticket).trim() ===
-                                        String(ticket).trim());
+                                    let existing = trackingRecords.findIndex(r => String(r.ticket).trim() === String(ticket).trim());
                                     let finalDate = dateStr;
                                     try {
-                                        if (typeof dateStr === 'string' && dateStr.includes('/')) {
-                                            let parts = dateStr.split('/');
-                                            if (parts[0].length === 2 && parts[2].length === 4)
-                                                finalDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                                        } else if (dateStr instanceof Date) { finalDate = dateStr
-                                            .toISOString().split('T')[0]; }
+                                        if (typeof dateStr === 'string' && dateStr.includes('/')) { let parts = dateStr.split('/'); if (parts[0].length === 2 && parts[2].length === 4) finalDate = `${parts[2]}-${parts[1]}-${parts[0]}`; }
+                                        else if (dateStr instanceof Date) { finalDate = dateStr.toISOString().split('T')[0]; }
                                     } catch (err) {}
-                                    let record = {
-                                        id: Date.now().toString() + Math.random().toString().slice(2, 6),
-                                        date: finalDate,
-                                        ticket: String(ticket).trim(),
-                                        event: event,
-                                        technician: technician,
-                                        status: 'Kembali',
-                                        items
-                                    };
-                                    if (existing !== -1) trackingRecords[existing] = record;
-                                    else trackingRecords.push(record);
+                                    let record = { id: Date.now().toString() + Math.random().toString().slice(2, 6), date: finalDate, ticket: String(ticket).trim(), event: event, technician: '', status: 'Kembali', items };
+                                    if (existing !== -1) trackingRecords[existing] = record; else trackingRecords.push(record);
                                     importedCount++;
                                 }
                             }
@@ -1663,27 +1280,16 @@
                     (async function syncAll() {
                         let synced = 0;
                         for (let rec of trackingRecords) {
-                            try {
-                                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'insert',
-                                        ...rec }) });
-                                synced++;
-                                msg.innerText = `☁️ Synced ${synced}/${trackingRecords.length} ...`;
-                            } catch (e) {}
+                            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'insert', ...rec }) }); synced++; msg.innerText = `☁️ Synced ${synced}/${trackingRecords.length} ...`; } catch (e) {}
                         }
                         msg.innerText = `✅ Done! ${trackingRecords.length} records synced.`;
-                        setTimeout(() => { msg.classList.add('hidden');
-                            document.getElementById('file-label').innerText = 'Choose File...';
-                            document.getElementById('import-file').value = ''; }, 4000);
+                        setTimeout(() => { msg.classList.add('hidden'); document.getElementById('file-label').innerText = 'Choose File...'; document.getElementById('import-file').value = ''; }, 4000);
                     })();
-                } catch (err) { msg.innerText = '❌ Failed to read file.';
-                    console.error(err); }
+                } catch (err) { msg.innerText = '❌ Failed to read file.'; console.error(err); }
             };
             reader.readAsArrayBuffer(fileInput.files[0]);
         }
 
-        // ================================================================
-        // LOOKUP & EXPORT
-        // ================================================================
         function lookupTicket() {
             const input = document.getElementById('lookup-input').value.trim().toLowerCase();
             const res = document.getElementById('lookup-result');
@@ -1691,478 +1297,210 @@
             const records = trackingRecords.filter(r => (String(r.ticket) || '').toLowerCase() === input);
             res.classList.remove('hidden');
             if (!records.length) {
-                res.innerHTML =
-                    `<div class="text-center py-6"><span class="text-5xl block mb-3 opacity-40">✕</span><p class="text-status-danger-text font-bold">Ticket not found.</p></div>`;
-                return;
+                res.innerHTML = `<div class="text-center py-6"><span class="text-5xl block mb-3 opacity-40">✕</span><p class="text-status-danger-text font-bold">Ticket not found.</p></div>`; return;
             }
             let html = '';
             records.forEach(r => {
                 const statusColor = r.status === 'Kembali' ? 'text-status-success-text' : 'text-status-warn-text';
                 const statusText = r.status === 'Kembali' ? tk('status_returned') : tk('status_borrowed');
-                const itemsList = r.items.map(i =>
-                    `<li class="flex justify-between border-b border-brand-border/40 py-1.5"><span class="text-brand-muted">${i.name}</span><span class="text-brand-text font-bold">${i.qty}</span></li>`
-                    ).join('');
-                html += `
-                        <div class="bg-brand-surface p-4 rounded-xl border border-brand-border space-y-3">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-xl font-extrabold text-status-info-text tracking-widest">${r.ticket}</h4>
-                                    <p class="text-sm text-brand-text font-bold mt-0.5">${r.event}</p>
-                                    <p class="text-xs text-brand-muted">${formatDate(r.date)}</p>
-                                </div>
-                                <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-full border ${statusColor} border-current/30">${statusText}</span>
-                            </div>
-                            <div class="pt-2 border-t border-brand-border/60">
-                                <p class="text-xs font-bold text-brand-muted uppercase tracking-wider mb-2">Items</p>
-                                <ul class="text-sm">${itemsList}</ul>
-                            </div>
-                        </div>
-                    `;
+                const itemsList = r.items.map(i => `<li class="flex justify-between border-b border-brand-border/40 py-1.5"><span class="text-brand-muted">${i.name}</span><span class="text-brand-text font-bold">${i.qty}</span></li>`).join('');
+                html += `<div class="bg-brand-surface p-4 rounded-xl border border-brand-border space-y-3"><div class="flex justify-between items-start"><div><h4 class="text-xl font-extrabold text-status-info-text tracking-widest">${r.ticket}</h4><p class="text-sm text-brand-text font-bold mt-0.5">${r.event}</p><p class="text-xs text-brand-muted">${formatDate(r.date)}</p></div><span class="px-3 py-1 text-[10px] font-bold uppercase rounded-full border ${statusColor} border-current/30">${statusText}</span></div><div class="pt-2 border-t border-brand-border/60"><p class="text-xs font-bold text-brand-muted uppercase tracking-wider mb-2">Items</p><ul class="text-sm">${itemsList}</ul></div></div>`;
             });
             res.innerHTML = html;
         }
 
         function exportData() {
-            const start = document.getElementById('export-start').value;
-            const end = document.getElementById('export-end').value;
+            const start = document.getElementById('export-start').value; const end = document.getElementById('export-end').value;
             let filtered = trackingRecords;
             if (start) filtered = filtered.filter(r => new Date(r.date) >= new Date(start));
             if (end) filtered = filtered.filter(r => new Date(r.date) <= new Date(end));
             if (!filtered.length) { alert('No data to export.'); return; }
             let csv = 'Date,Ticket Number,Event Name,Status,Item Name,Quantity\n';
-            filtered.forEach(r => {
-                r.items.forEach(i => {
-                    let safeEvent = `"${(r.event || '').replace(/"/g, '""')}"`;
-                    csv += `${r.date},${r.ticket},${safeEvent},${r.status},"${i.name}",${i.qty}\n`;
-                });
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', `Binus_Logistics_${start || 'all'}_to_${end || 'all'}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            filtered.forEach(r => { r.items.forEach(i => { let safeEvent = `"${(r.event || '').replace(/"/g, '""')}"`; csv += `${r.date},${r.ticket},${safeEvent},${r.status},"${i.name}",${i.qty}\n`; }); });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.setAttribute('download', `Binus_Logistics_${start || 'all'}_to_${end || 'all'}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // ================================================================
-        // AI PROMPT GENERATOR
-        // ================================================================
         function generateAIPrompt() {
-            const mSelect = document.getElementById('prompt-month');
-            const ySelect = document.getElementById('prompt-year');
+            const mSelect = document.getElementById('prompt-month'); const ySelect = document.getElementById('prompt-year');
             if (!mSelect || !ySelect || !mSelect.value || !ySelect.value) return;
-            const m = parseInt(mSelect.value);
-            const y = parseInt(ySelect.value);
-            const filtered = trackingRecords.filter(r => {
-                const d = new Date(r.date);
-                if (isNaN(d)) return false;
-                return d.getFullYear() === y && d.getMonth() === m;
-            });
-            const mNames = currentLang === 'en' ?
-                ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
-                    'November', 'December'
-                ] :
-                ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober',
-                    'November', 'Desember'
-                ];
+            const m = parseInt(mSelect.value); const y = parseInt(ySelect.value);
+            const filtered = trackingRecords.filter(r => { const d = new Date(r.date); if (isNaN(d)) return false; return d.getFullYear() === y && d.getMonth() === m; });
+            const mNames = currentLang === 'en' ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] : ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
             const monthName = mNames[m];
-            let totalLoans = filtered.length;
-            let active = 0,
-                returned = 0,
-                overdue = 0;
-            let itemsCount = {},
-                eventsCount = {};
-            const now = new Date();
+            let totalLoans = filtered.length; let active = 0, returned = 0, overdue = 0; let itemsCount = {}, eventsCount = {}; const now = new Date();
             filtered.forEach(r => {
-                if (r.status === 'Dipinjam') {
-                    active++;
-                    const diffDays = Math.ceil((now - new Date(r.date)) / (1000 * 60 * 60 * 24));
-                    if (diffDays > 7) overdue++;
-                } else {
-                    returned++;
-                }
-                let ev = (r.event || 'Unknown').trim();
-                if (!eventsCount[ev]) eventsCount[ev] = 0;
-                r.items.forEach(i => {
-                    let q = parseInt(i.qty) || 0;
-                    itemsCount[i.name] = (itemsCount[i.name] || 0) + q;
-                    eventsCount[ev] += q;
-                });
+                if (r.status === 'Dipinjam') { active++; const diffDays = Math.ceil((now - new Date(r.date)) / (1000 * 60 * 60 * 24)); if (diffDays > 7) overdue++; } else { returned++; }
+                let ev = (r.event || 'Unknown').trim(); if (!eventsCount[ev]) eventsCount[ev] = 0;
+                r.items.forEach(i => { let q = parseInt(i.qty) || 0; itemsCount[i.name] = (itemsCount[i.name] || 0) + q; eventsCount[ev] += q; });
             });
-            const topItems = Object.entries(itemsCount).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x =>
-                `- ${x[0]}: ${x[1]} unit`).join('\n');
-            const topEvents = Object.entries(eventsCount).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x =>
-                `- ${x[0]} (${x[1]} unit)`).join('\n');
-            let prompt =
-                `Sebagai Senior Data Analyst, tolong buatkan draf materi presentasi (PPT) logistik operasional untuk periode ${monthName} ${y}.\n\n`;
-            prompt += `[DATA OPERASIONAL]\n`;
-            prompt += `- Total Tiket Peminjaman: ${totalLoans}\n`;
-            prompt += `- Tiket Selesai (Returned): ${returned}\n`;
-            prompt += `- Tiket Aktif (Borrowed): ${active}\n`;
-            prompt += `- Tiket Terlambat (Overdue >7 Hari): ${overdue}\n\n`;
-            prompt += `[TOP 5 BARANG KELUAR]\n${topItems || '- Tidak ada data'}\n\n`;
-            prompt += `[TOP 5 EVENT (Beban Unit Tertinggi)]\n${topEvents || '- Tidak ada data'}\n\n`;
-            prompt += `[INSTRUKSI KRITIS & ANALISIS]\n`;
-            prompt +=
-                `Berdasarkan data mentah di atas, tolong susun output menjadi slide PPT dengan rincian berikut:\n`;
-            prompt +=
-                `1. Executive Summary: Berikan ringkasan tajam (maksimal 2 kalimat) mengenai status kesehatan operasional logistik bulan ini.\n`;
-            prompt +=
-                `2. Analisis Kritis: Jangan hanya mengulang angka. Soroti metrik 'Tiket Terlambat' dibandingkan dengan 'Total Tiket'. Buat deduksi logis apakah ini menunjukkan adanya bottleneck dalam alur pengembalian barang atau indikasi pelanggaran SOP peminjam.\n`;
-            prompt +=
-                `3. Rekomendasi Strategis: Berdasarkan distribusi 'Top 5 Barang' dan 'Top 5 Event', berikan 2 rekomendasi preventif terkait pengadaan, penjadwalan maintenance, atau alokasi resource untuk menghadapi pola event yang sama di masa depan.\n`;
-            prompt +=
-                `4. Format & Tone: Gunakan format pelaporan korporat yang terstruktur. Pastikan bahasa yang digunakan ringkas, streamlined, profesional, dan to-the-point. Hilangkan kata-kata pengantar yang tidak perlu. Output harus langsung siap disajikan ke level audiens Senior Manager.\n`;
-            document.getElementById('prompt-output').value = prompt;
-            document.getElementById('prompt-output-container').classList.remove('hidden');
+            const topItems = Object.entries(itemsCount).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => `- ${x[0]}: ${x[1]} unit`).join('\n');
+            const topEvents = Object.entries(eventsCount).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => `- ${x[0]} (${x[1]} unit)`).join('\n');
+            let prompt = `Sebagai Senior Data Analyst, tolong buatkan draf materi presentasi (PPT) logistik operasional untuk periode ${monthName} ${y}.\n\n[DATA OPERASIONAL]\n- Total Tiket Peminjaman: ${totalLoans}\n- Tiket Selesai (Returned): ${returned}\n- Tiket Aktif (Borrowed): ${active}\n- Tiket Terlambat (Overdue >7 Hari): ${overdue}\n\n[TOP 5 BARANG KELUAR]\n${topItems || '- Tidak ada data'}\n\n[TOP 5 EVENT (Beban Unit Tertinggi)]\n${topEvents || '- Tidak ada data'}\n\n[INSTRUKSI KRITIS & ANALISIS]\nBerdasarkan data mentah di atas, tolong susun output menjadi slide PPT dengan rincian berikut:\n1. Executive Summary: Berikan ringkasan tajam (maksimal 2 kalimat) mengenai status kesehatan operasional logistik bulan ini.\n2. Analisis Kritis: Jangan hanya mengulang angka. Soroti metrik 'Tiket Terlambat' dibandingkan dengan 'Total Tiket'. Buat deduksi logis apakah ini menunjukkan adanya bottleneck dalam alur pengembalian barang atau indikasi pelanggaran SOP peminjam.\n3. Rekomendasi Strategis: Berdasarkan distribusi 'Top 5 Barang' dan 'Top 5 Event', berikan 2 rekomendasi preventif terkait pengadaan, penjadwalan maintenance, atau alokasi resource untuk menghadapi pola event yang sama di masa depan.\n4. Format & Tone: Gunakan format pelaporan korporat yang terstruktur. Pastikan bahasa yang digunakan ringkas, streamlined, profesional, dan to-the-point. Hilangkan kata-kata pengantar yang tidak perlu. Output harus langsung siap disajikan ke level audiens Senior Manager.\n`;
+            document.getElementById('prompt-output').value = prompt; document.getElementById('prompt-output-container').classList.remove('hidden');
         }
 
         function copyAIPrompt() {
-            const text = document.getElementById('prompt-output');
-            text.select();
-            document.execCommand("copy");
-            const btn = document.getElementById('btn-copy-text');
-            const original = btn.innerText;
-            btn.innerText = 'Copied!';
-            setTimeout(() => btn.innerText = original, 2000);
+            const text = document.getElementById('prompt-output'); text.select(); document.execCommand("copy");
+            const btn = document.getElementById('btn-copy-text'); const original = btn.innerText; btn.innerText = 'Copied!'; setTimeout(() => btn.innerText = original, 2000);
         }
 
         // ================================================================
-        // TABLE & PAGINATION
+        // TABLE RENDER (TANPA HORIZONTAL SCROLL)
         // ================================================================
-        function renderTableResetPage() { currentPage = 1;
-            renderTable(); }
+        function renderTableResetPage() { currentPage = 1; renderTable(); }
 
         function renderTable() {
             const tbody = document.getElementById('loan-table-body');
             const empty = document.getElementById('empty-state');
             const search = document.getElementById('table-search').value.toLowerCase();
             tbody.innerHTML = '';
+            
             let filtered = trackingRecords.filter(item => {
                 const itemsStr = item.items.map(i => `${i.name} ${i.qty}`).join(' ');
-                return (String(item.ticket) || '').toLowerCase().includes(search) ||
-                    (item.event || '').toLowerCase().includes(search) ||
-                    itemsStr.toLowerCase().includes(search);
+                return (String(item.ticket) || '').toLowerCase().includes(search) || (item.event || '').toLowerCase().includes(search) || itemsStr.toLowerCase().includes(search);
             });
             filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
             if (!filtered.length) {
                 empty.classList.remove('hidden');
                 document.getElementById('pagination-info').innerText = 'Showing 0 entries';
-                document.getElementById('btn-prev').disabled = true;
-                document.getElementById('btn-next').disabled = true;
+                document.getElementById('btn-prev').disabled = true; document.getElementById('btn-next').disabled = true;
                 return;
             }
             empty.classList.add('hidden');
-            const total = filtered.length;
-            const pages = Math.ceil(total / rowsPerPage);
-            if (currentPage > pages) currentPage = pages;
-            if (currentPage < 1) currentPage = 1;
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = Math.min(start + rowsPerPage, total);
-            const pageItems = filtered.slice(start, end);
-            pageItems.forEach(record => {
-                const statusClass = record.status === 'Kembali' ?
-                    'bg-status-success-bg text-status-success-text border-status-success-border' :
-                    'bg-status-warn-bg text-status-warn-text border-status-warn-border';
+            const total = filtered.length; const pages = Math.ceil(total / rowsPerPage);
+            if (currentPage > pages) currentPage = pages; if (currentPage < 1) currentPage = 1;
+            const start = (currentPage - 1) * rowsPerPage; const end = Math.min(start + rowsPerPage, total);
+            
+            filtered.slice(start, end).forEach(record => {
+                const statusClass = record.status === 'Kembali' ? 'bg-status-success-bg text-status-success-text border-status-success-border' : 'bg-status-warn-bg text-status-warn-text border-status-warn-border';
                 const statusText = record.status === 'Kembali' ? tk('status_returned') : tk('status_borrowed');
-                const itemsHtml = record.items.map(i =>
-                    `<span class="inline-block bg-brand-glow px-2.5 py-0.5 rounded-lg mr-1 mb-1 border border-brand-border text-xs font-medium text-brand-text">${i.qty}x ${i.name}</span>`
-                    ).join('');
+                const itemsHtml = record.items.map(i => `<span class="inline-block bg-brand-glow px-2 py-0.5 rounded-md mr-1 mb-1 border border-brand-border text-[10px] sm:text-xs font-medium text-brand-text">${i.qty}x ${i.name}</span>`).join('');
                 const isAdmin = currentUser && currentUser.role === 'admin';
+                
                 tbody.innerHTML += `
-                        <tr class="table-row border-b border-brand-border/40">
-                            <td class="py-3 px-5 text-brand-text whitespace-nowrap text-sm">${formatDate(record.date)}</td>
-                            <td class="py-3 px-5 font-bold text-status-info-text tracking-wide whitespace-nowrap">${record.ticket}</td>
-                            <td class="py-3 px-5 text-brand-text font-semibold truncate max-w-xs">${record.event}</td>
-                            <td class="py-3 px-5 text-xs">${itemsHtml}</td>
-                            <td class="py-3 px-5 text-center whitespace-nowrap">
-                                <span class="badge-status px-3 py-1 text-[10px] uppercase font-extrabold tracking-wide rounded-full border shadow-sm ${statusClass}">${statusText}</span>
-                            </td>
-                            <td class="py-3 px-5 text-right whitespace-nowrap text-xs space-x-2 admin-only" style="display:${isAdmin ? '' : 'none'}">
+                    <tr class="table-row border-b border-brand-border/40 align-top sm:align-middle">
+                        <td class="py-3 px-3 text-brand-text text-xs sm:text-sm">${formatDate(record.date)}</td>
+                        <td class="py-3 px-3 font-bold text-status-info-text tracking-wide text-xs sm:text-sm break-all">${record.ticket}</td>
+                        <td class="py-3 px-3">
+                            <div class="text-brand-text font-bold text-xs sm:text-sm mb-1">${record.event}</div>
+                            <div class="flex flex-wrap">${itemsHtml}</div>
+                            <!-- Mobile status display -->
+                            <div class="mt-2 sm:hidden inline-block px-2 py-0.5 text-[9px] uppercase font-extrabold tracking-wide rounded border ${statusClass}">${statusText}</div>
+                        </td>
+                        <td class="py-3 px-3 text-center hidden sm:table-cell">
+                            <span class="badge-status px-2.5 py-1 text-[10px] uppercase font-extrabold tracking-wide rounded-full border shadow-sm ${statusClass}">${statusText}</span>
+                        </td>
+                        <td class="py-3 px-3 text-right text-xs admin-only" style="display:${isAdmin ? '' : 'none'}">
+                            <div class="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-2">
                                 <button onclick="editRecord('${record.id}')" class="text-status-info-text hover:opacity-70 font-bold transition">Edit</button>
-                                <span class="text-brand-border">|</span>
                                 <button onclick="deleteRecord('${record.id}')" class="text-status-danger-text hover:opacity-70 font-bold transition">Del</button>
-                            </td>
-                        </tr>
-                    `;
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
-            document.getElementById('pagination-info').innerText =
-                `Showing ${start + 1} - ${end} of ${total} entries (Page ${currentPage}/${pages})`;
-            document.getElementById('btn-prev').disabled = currentPage === 1;
-            document.getElementById('btn-next').disabled = currentPage === pages;
+            document.getElementById('pagination-info').innerText = `Showing ${start + 1} - ${end} of ${total} entries (Page ${currentPage}/${pages})`;
+            document.getElementById('btn-prev').disabled = currentPage === 1; document.getElementById('btn-next').disabled = currentPage === pages;
         }
 
-        function prevPage() { if (currentPage > 1) { currentPage--;
-                renderTable(); } }
-
-        function nextPage() { const filtered = trackingRecords.length; if (currentPage * rowsPerPage < filtered) { currentPage++;
-                renderTable(); } }
+        function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
+        function nextPage() { if (currentPage * rowsPerPage < trackingRecords.length) { currentPage++; renderTable(); } }
 
         // ================================================================
-        // FORM
+        // FORM & CLOUD SYNC
         // ================================================================
-        function initFormItems() { document.getElementById('items-container').innerHTML = '';
-            addFormItemRow(); }
-
+        function initFormItems() { document.getElementById('items-container').innerHTML = ''; addFormItemRow(); }
         function addFormItemRow(name = '', qty = 1) {
             const container = document.getElementById('items-container');
             const rowId = 'item-row-' + Date.now() + Math.random().toString().slice(2, 6);
-            const opts = masterItemsList.map(item => `<option value="${item}" ${item === name ? 'selected' : ''}>${item}</option>`)
-                .join('');
-            const div = document.createElement('div');
-            div.id = rowId;
-            div.className = 'flex items-center space-x-2 animate-fade-in';
-            div.innerHTML = `
-                    <select class="item-select flex-1 px-3 py-2 rounded-xl input-modern text-brand-text font-medium text-xs focus:border-brand-primary outline-none transition">
-                        <option value="" disabled ${!name ? 'selected' : ''}>-- Select Item --</option>${opts}
-                    </select>
-                    <input type="number" min="1" value="${qty}" class="item-qty w-16 px-2 py-2 rounded-xl input-modern text-brand-text text-xs text-center focus:border-brand-primary outline-none transition" />
-                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="p-2 text-brand-muted hover:text-status-danger-text rounded-lg border border-brand-border transition bg-brand-surface hover:bg-brand-glow">✕</button>
-                `;
+            const opts = masterItemsList.map(item => `<option value="${item}" ${item === name ? 'selected' : ''}>${item}</option>`).join('');
+            const div = document.createElement('div'); div.id = rowId; div.className = 'flex items-center space-x-2 animate-fade-in';
+            div.innerHTML = `<select class="item-select flex-1 px-3 py-2 rounded-xl input-modern text-brand-text font-medium text-xs focus:border-brand-primary outline-none transition"><option value="" disabled ${!name ? 'selected' : ''}>-- Select Item --</option>${opts}</select><input type="number" min="1" value="${qty}" class="item-qty w-16 px-2 py-2 rounded-xl input-modern text-brand-text text-xs text-center focus:border-brand-primary outline-none transition" /><button type="button" onclick="document.getElementById('${rowId}').remove()" class="p-2 text-brand-muted hover:text-status-danger-text rounded-lg border border-brand-border transition bg-brand-surface hover:bg-brand-glow">✕</button>`;
             container.appendChild(div);
-            setTimeout(refreshSelectArrows, 50);
         }
 
         function handleSubmitLoan(e) {
-            e.preventDefault();
-            if (currentUser.role !== 'admin') return;
-            const id = document.getElementById('edit-id').value;
-            const date = document.getElementById('input-date').value;
-            const ticket = document.getElementById('input-ticket').value;
-            const event = document.getElementById('input-event').value;
-            const status = document.getElementById('input-status').value;
+            e.preventDefault(); if (currentUser.role !== 'admin') return;
+            const id = document.getElementById('edit-id').value; const date = document.getElementById('input-date').value; const ticket = document.getElementById('input-ticket').value; const event = document.getElementById('input-event').value; const status = document.getElementById('input-status').value;
             const items = [];
-            document.querySelectorAll('#items-container > div').forEach(row => {
-                const name = row.querySelector('.item-select').value;
-                const qty = row.querySelector('.item-qty').value;
-                if (name && qty > 0) items.push({ name, qty: parseInt(qty) });
-            });
+            document.querySelectorAll('#items-container > div').forEach(row => { const name = row.querySelector('.item-select').value; const qty = row.querySelector('.item-qty').value; if (name && qty > 0) items.push({ name, qty: parseInt(qty) }); });
             if (!items.length) { alert('Please select at least 1 item!'); return; }
-            let action = 'insert';
-            let record;
-            if (id) {
-                const idx = trackingRecords.findIndex(r => String(r.id) === String(id));
-                record = { id, date, ticket, event, items, status };
-                if (idx !== -1) trackingRecords[idx] = record;
-                action = 'update';
-            } else {
-                record = { id: Date.now().toString(), date, ticket, event, items, status };
-                trackingRecords.push(record);
-            }
-            saveState();
-            resetForm();
-            setSyncStatus('⏳ Syncing to cloud...');
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, ...record }) })
-                .then(() => setSyncStatus(`✅ Synced (${action}) — ${new Date().toLocaleTimeString()}`))
-                .catch(() => setSyncStatus('⚠️ Saved locally, but cloud sync failed.'));
+            let action = 'insert'; let record;
+            if (id) { const idx = trackingRecords.findIndex(r => String(r.id) === String(id)); record = { id, date, ticket, event, items, status }; if (idx !== -1) trackingRecords[idx] = record; action = 'update'; }
+            else { record = { id: Date.now().toString(), date, ticket, event, items, status }; trackingRecords.push(record); }
+            saveState(); resetForm(); setSyncStatus('⏳ Syncing to cloud...');
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, ...record }) }).then(() => setSyncStatus(`✅ Synced (${action}) — ${new Date().toLocaleTimeString()}`)).catch(() => setSyncStatus('⚠️ Saved locally, but cloud sync failed.'));
         }
 
         function editRecord(id) {
-            const record = trackingRecords.find(r => String(r.id) === String(id));
-            if (!record) return;
-            document.getElementById('edit-id').value = record.id;
-            document.getElementById('input-date').value = record.date;
-            document.getElementById('input-ticket').value = record.ticket;
-            document.getElementById('input-event').value = record.event;
-            document.getElementById('input-status').value = record.status;
-            document.getElementById('items-container').innerHTML = '';
-            record.items.forEach(i => addFormItemRow(i.name, i.qty));
-            document.getElementById('form-title').innerText = '✏️ Edit Mode';
-            document.getElementById('submit-btn').innerText = 'Update Record';
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            setTimeout(refreshSelectArrows, 100);
+            const record = trackingRecords.find(r => String(r.id) === String(id)); if (!record) return;
+            document.getElementById('edit-id').value = record.id; document.getElementById('input-date').value = record.date; document.getElementById('input-ticket').value = record.ticket; document.getElementById('input-event').value = record.event; document.getElementById('input-status').value = record.status;
+            document.getElementById('items-container').innerHTML = ''; record.items.forEach(i => addFormItemRow(i.name, i.qty));
+            document.getElementById('form-title').innerText = '✏️ Edit Mode'; document.getElementById('submit-btn').innerText = 'Update Record'; document.getElementById('cancel-edit-btn').classList.remove('hidden');
         }
 
         function deleteRecord(id) {
             if (confirm('Delete this record permanently?')) {
-                trackingRecords = trackingRecords.filter(r => String(r.id) !== String(id));
-                saveState();
+                trackingRecords = trackingRecords.filter(r => String(r.id) !== String(id)); saveState();
                 if (document.getElementById('edit-id').value === id) resetForm();
                 setSyncStatus('⏳ Syncing delete to cloud...');
-                fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id }) })
-                    .then(() => setSyncStatus(`✅ Deleted & synced — ${new Date().toLocaleTimeString()}`))
-                    .catch(() => setSyncStatus('⚠️ Deleted locally, but cloud sync failed.'));
+                fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id }) }).then(() => setSyncStatus(`✅ Deleted & synced — ${new Date().toLocaleTimeString()}`)).catch(() => setSyncStatus('⚠️ Deleted locally, but cloud sync failed.'));
             }
         }
 
-        function resetForm() {
-            document.getElementById('loan-form').reset();
-            document.getElementById('edit-id').value = '';
-            initFormItems();
-            document.getElementById('form-title').innerText = 'New Loan Entry';
-            document.getElementById('submit-btn').innerText = 'Save Record';
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-            setTimeout(refreshSelectArrows, 100);
-        }
-
-        function saveState() { localStorage.setItem(DB_KEY, JSON.stringify(trackingRecords));
-            renderTable(); }
-
-        // ================================================================
-        // CLOUD SYNC
-        // ================================================================
+        function resetForm() { document.getElementById('loan-form').reset(); document.getElementById('edit-id').value = ''; initFormItems(); document.getElementById('form-title').innerText = 'New Loan Entry'; document.getElementById('submit-btn').innerText = 'Save Record'; document.getElementById('cancel-edit-btn').classList.add('hidden'); }
+        function saveState() { localStorage.setItem(DB_KEY, JSON.stringify(trackingRecords)); renderTable(); }
         function setSyncStatus(text) { const el = document.getElementById('sync-status'); if (el) el.innerText = text; }
 
         async function pullFromCloud() {
             setSyncStatus('⏳ Pulling from cloud...');
-            try {
-                const r = await fetch(API_URL);
-                const data = await r.json();
-                if (Array.isArray(data)) {
-                    trackingRecords = data;
-                    saveState();
-                    setSyncStatus(`✅ Synced ${data.length} record(s) from cloud — ${new Date().toLocaleTimeString()}`);
-                } else { setSyncStatus('⚠️ Cloud returned unexpected data.'); }
-            } catch (e) { setSyncStatus('❌ Failed to reach cloud. Cek koneksi / API_URL.'); }
+            try { const r = await fetch(API_URL); const data = await r.json(); if (Array.isArray(data)) { trackingRecords = data; saveState(); setSyncStatus(`✅ Synced ${data.length} record(s) from cloud — ${new Date().toLocaleTimeString()}`); } else { setSyncStatus('⚠️ Cloud returned unexpected data.'); } }
+            catch (e) { setSyncStatus('❌ Failed to reach cloud. Cek koneksi / API_URL.'); }
         }
 
         async function pushAllToCloud() {
             if (!trackingRecords.length) { setSyncStatus('⚠️ No local records to push.'); return; }
             let synced = 0;
-            for (const rec of trackingRecords) {
-                try {
-                    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'insert', ...rec }) });
-                    synced++;
-                    setSyncStatus(`☁️ Pushing ${synced}/${trackingRecords.length}...`);
-                } catch (e) {}
-            }
-            setSyncStatus(
-                `✅ Pushed ${synced}/${trackingRecords.length} record(s) to cloud — ${new Date().toLocaleTimeString()}`);
+            for (const rec of trackingRecords) { try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'insert', ...rec }) }); synced++; setSyncStatus(`☁️ Pushing ${synced}/${trackingRecords.length}...`); } catch (e) {} }
+            setSyncStatus(`✅ Pushed ${synced}/${trackingRecords.length} record(s) to cloud — ${new Date().toLocaleTimeString()}`);
         }
 
         // ================================================================
-        // DASHBOARD RENDER
+        // DASHBOARD RENDER & CHART ... (Logika Chart Sama Persis)
         // ================================================================
         function renderDashboard() {
-            const total = trackingRecords.length;
-            const active = trackingRecords.filter(r => r.status === 'Dipinjam').length;
-            const done = trackingRecords.filter(r => r.status === 'Kembali').length;
-            const now = new Date();
-            const overdue = trackingRecords.filter(r => {
-                if (r.status !== 'Dipinjam') return false;
-                const diffDays = Math.ceil((now - new Date(r.date)) / (1000 * 60 * 60 * 24));
-                return diffDays > 7;
-            }).length;
-            let totalItems = 0;
-            const itemCounts = {};
-            trackingRecords.forEach(r => {
-                r.items.forEach(i => {
-                    const qty = parseInt(i.qty) || 0;
-                    itemCounts[i.name] = (itemCounts[i.name] || 0) + qty;
-                    totalItems += qty;
-                });
-            });
-            document.getElementById('dash-total-loans').innerText = total;
-            document.getElementById('dash-active-loans').innerText = active;
-            document.getElementById('dash-done-loans').innerText = done;
-            document.getElementById('dash-overdue-loans').innerText = overdue;
-            document.getElementById('dash-total-items').innerText = totalItems;
+            const total = trackingRecords.length; const active = trackingRecords.filter(r => r.status === 'Dipinjam').length; const done = trackingRecords.filter(r => r.status === 'Kembali').length;
+            const now = new Date(); const overdue = trackingRecords.filter(r => { if (r.status !== 'Dipinjam') return false; const diffDays = Math.ceil((now - new Date(r.date)) / (1000 * 60 * 60 * 24)); return diffDays > 7; }).length;
+            let totalItems = 0; const itemCounts = {};
+            trackingRecords.forEach(r => { r.items.forEach(i => { const qty = parseInt(i.qty) || 0; itemCounts[i.name] = (itemCounts[i.name] || 0) + qty; totalItems += qty; }); });
+            document.getElementById('dash-total-loans').innerText = total; document.getElementById('dash-active-loans').innerText = active; document.getElementById('dash-done-loans').innerText = done; document.getElementById('dash-overdue-loans').innerText = overdue; document.getElementById('dash-total-items').innerText = totalItems;
 
-            const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
-            const top10 = sortedItems.slice(0, 10);
+            const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]); const top10 = sortedItems.slice(0, 10);
+            const eventCounts = {}; trackingRecords.forEach(r => { const evName = (r.event || '').trim(); if (!evName) return; const totalQty = r.items.reduce((sum, i) => sum + (parseInt(i.qty) || 0), 0); if (!eventCounts[evName]) eventCounts[evName] = 0; eventCounts[evName] += totalQty; });
+            const topEvents = Object.entries(eventCounts).sort((a, b) => b[1] - a[1]).slice(0, 5); const statusData = [active, done];
+            const allItemsWithCount = masterItemsList.map(name => ({ name, count: itemCounts[name] || 0 })).sort((a, b) => a.count - b.count); const bottom10 = allItemsWithCount.slice(0, 10);
+            const monthMap = {}; trackingRecords.forEach(r => { const d = new Date(r.date); if (!isNaN(d)) { const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; monthMap[key] = (monthMap[key] || 0) + 1; } });
+            const sortedMonths = Object.keys(monthMap).sort(); const mNames = currentLang === 'en' ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] : ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            const monthLabels = sortedMonths.map(m => { const [year, month] = m.split('-'); return `${mNames[parseInt(month)-1]} ${year}`; }); const monthValues = sortedMonths.map(m => monthMap[m]);
 
-            const eventCounts = {};
-            trackingRecords.forEach(r => {
-                const evName = (r.event || '').trim();
-                if (!evName) return;
-                const totalQty = r.items.reduce((sum, i) => sum + (parseInt(i.qty) || 0), 0);
-                if (!eventCounts[evName]) eventCounts[evName] = 0;
-                eventCounts[evName] += totalQty;
-            });
-            const topEvents = Object.entries(eventCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-            const statusData = [active, done];
-
-            const allItemsWithCount = masterItemsList.map(name => ({ name, count: itemCounts[name] || 0 }));
-            allItemsWithCount.sort((a, b) => a.count - b.count);
-            const bottom10 = allItemsWithCount.slice(0, 10);
-
-            const monthMap = {};
-            trackingRecords.forEach(r => {
-                const d = new Date(r.date);
-                if (!isNaN(d)) {
-                    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-                    monthMap[key] = (monthMap[key] || 0) + 1;
-                }
-            });
-            const sortedMonths = Object.keys(monthMap).sort();
-
-            const mNames = currentLang === 'en' ?
-                ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] :
-                ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-
-            const monthLabels = sortedMonths.map(m => {
-                const [year, month] = m.split('-');
-                return `${mNames[parseInt(month)-1]} ${year}`;
-            });
-            const monthValues = sortedMonths.map(m => monthMap[m]);
-
-            const cs = getComputedStyle(document.documentElement);
-            Chart.defaults.color = cs.getPropertyValue('--brand-muted').trim();
-            Chart.defaults.font.family = 'Inter, sans-serif';
-            const gridColor = cs.getPropertyValue('--glass-border').trim();
-
-            const colorTop10 = cs.getPropertyValue('--chart-bg-top10').trim();
-            const colorTop5 = cs.getPropertyValue('--chart-bg-top5').trim();
-            const colorBot10 = cs.getPropertyValue('--chart-bg-bot10').trim();
-            const statusColor1 = cs.getPropertyValue('--status-warn-text').trim();
-            const statusColor2 = cs.getPropertyValue('--status-success-text').trim();
-            const trendBorder = cs.getPropertyValue('--brand-accent').trim();
-            const trendBg = cs.getPropertyValue('--brand-glow').trim();
+            const cs = getComputedStyle(document.documentElement); Chart.defaults.color = cs.getPropertyValue('--brand-muted').trim(); Chart.defaults.font.family = 'Inter, sans-serif'; const gridColor = cs.getPropertyValue('--glass-border').trim();
+            const colorTop10 = cs.getPropertyValue('--chart-bg-top10').trim(); const colorTop5 = cs.getPropertyValue('--chart-bg-top5').trim(); const colorBot10 = cs.getPropertyValue('--chart-bg-bot10').trim(); const statusColor1 = cs.getPropertyValue('--status-warn-text').trim(); const statusColor2 = cs.getPropertyValue('--status-success-text').trim(); const trendBorder = cs.getPropertyValue('--brand-accent').trim(); const trendBg = cs.getPropertyValue('--brand-glow').trim();
 
             if (chartTop10Instance) chartTop10Instance.destroy();
-            chartTop10Instance = new Chart(document.getElementById('chartTop10'), {
-                type: 'bar',
-                data: { labels: top10.map(i => i[0]), datasets: [{ data: top10.map(i => i[1]), backgroundColor: colorTop10,
-                        borderRadius: 6 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { grid: { color: gridColor } }, y: { grid: { display: false } } } }
-            });
+            chartTop10Instance = new Chart(document.getElementById('chartTop10'), { type: 'bar', data: { labels: top10.map(i => i[0]), datasets: [{ data: top10.map(i => i[1]), backgroundColor: colorTop10, borderRadius: 6 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor } }, y: { grid: { display: false } } } } });
 
             if (chartTopEventsInstance) chartTopEventsInstance.destroy();
-            chartTopEventsInstance = new Chart(document.getElementById('chartTopEvents'), {
-                type: 'bar',
-                data: { labels: topEvents.map(i => i[0]), datasets: [{ data: topEvents.map(i => i[1]),
-                        backgroundColor: colorTop5, borderRadius: 6 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { grid: { color: gridColor }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
-            });
+            chartTopEventsInstance = new Chart(document.getElementById('chartTopEvents'), { type: 'bar', data: { labels: topEvents.map(i => i[0]), datasets: [{ data: topEvents.map(i => i[1]), backgroundColor: colorTop5, borderRadius: 6 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } } });
 
             if (chartStatusInstance) chartStatusInstance.destroy();
-            chartStatusInstance = new Chart(document.getElementById('chartStatus'), {
-                type: 'doughnut',
-                data: { labels: [tk('chart_borrowed'), tk('chart_returned')], datasets: [{ data: statusData,
-                        backgroundColor: [statusColor1, statusColor2], borderColor: 'transparent',
-                        borderWidth: 3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom',
-                            labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } } },
-                    cutout: '65%' }
-            });
+            chartStatusInstance = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: [tk('chart_borrowed'), tk('chart_returned')], datasets: [{ data: statusData, backgroundColor: [statusColor1, statusColor2], borderColor: 'transparent', borderWidth: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } } }, cutout: '65%' } });
 
             if (chartBottom10Instance) chartBottom10Instance.destroy();
-            chartBottom10Instance = new Chart(document.getElementById('chartBottom10'), {
-                type: 'bar',
-                data: { labels: bottom10.map(i => i.name), datasets: [{ data: bottom10.map(i => i.count),
-                        backgroundColor: colorBot10, borderRadius: 6 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { grid: { color: gridColor }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
-            });
+            chartBottom10Instance = new Chart(document.getElementById('chartBottom10'), { type: 'bar', data: { labels: bottom10.map(i => i.name), datasets: [{ data: bottom10.map(i => i.count), backgroundColor: colorBot10, borderRadius: 6 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } } });
 
             if (chartTrendInstance) chartTrendInstance.destroy();
-            chartTrendInstance = new Chart(document.getElementById('chartTrend'), {
-                type: 'line',
-                data: { labels: monthLabels, datasets: [{ data: monthValues, borderColor: trendBorder,
-                        backgroundColor: trendBg, borderWidth: 3, pointBackgroundColor: trendBorder,
-                        pointBorderColor: trendBorder, pointBorderWidth: 2, pointRadius: 4, fill: true,
-                        tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor },
-                            beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
+            chartTrendInstance = new Chart(document.getElementById('chartTrend'), { type: 'line', data: { labels: monthLabels, datasets: [{ data: monthValues, borderColor: trendBorder, backgroundColor: trendBg, borderWidth: 3, pointBackgroundColor: trendBorder, pointBorderColor: trendBorder, pointBorderWidth: 2, pointRadius: 4, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor }, beginAtZero: true, ticks: { stepSize: 1 } } } } });
 
             renderHeatmap();
         }
@@ -2171,215 +1509,95 @@
         // HEATMAP
         // ================================================================
         function setupHeatmapSelectors() {
-            const mSelect = document.getElementById('heatmap-month-select');
-            const yrSelect = document.getElementById('heatmap-year-select');
-            const promptMSelect = document.getElementById('prompt-month');
-            const promptYrSelect = document.getElementById('prompt-year');
-
-            const mNames = currentLang === 'en' ?
-                ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] :
-                ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-
-            let mHtml = '';
-            mNames.forEach((name, i) => { mHtml += `<option value="${i}">${name}</option>`; });
-
-            const currVal = mSelect.value || new Date().getMonth();
-            mSelect.innerHTML = mHtml;
-            mSelect.value = currVal;
-
-            if (promptMSelect) {
-                promptMSelect.innerHTML = mHtml;
-                promptMSelect.value = currVal;
-            }
-
+            const mSelect = document.getElementById('heatmap-month-select'); const yrSelect = document.getElementById('heatmap-year-select'); const promptMSelect = document.getElementById('prompt-month'); const promptYrSelect = document.getElementById('prompt-year');
+            const mNames = currentLang === 'en' ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] : ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            let mHtml = ''; mNames.forEach((name, i) => { mHtml += `<option value="${i}">${name}</option>`; });
+            const currVal = mSelect.value || new Date().getMonth(); mSelect.innerHTML = mHtml; mSelect.value = currVal;
+            if (promptMSelect) { promptMSelect.innerHTML = mHtml; promptMSelect.value = currVal; }
             if (!yrSelect.innerHTML) {
-                const currentYear = new Date().getFullYear();
-                let yrHtml = '';
-                for (let y = currentYear - 3; y <= currentYear + 1; y++) {
-                    yrHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
-                }
-                yrSelect.innerHTML = yrHtml;
-                if (promptYrSelect) {
-                    promptYrSelect.innerHTML = yrHtml;
-                    promptYrSelect.value = currentYear;
-                }
+                const currentYear = new Date().getFullYear(); let yrHtml = '';
+                for (let y = currentYear - 3; y <= currentYear + 1; y++) { yrHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`; }
+                yrSelect.innerHTML = yrHtml; if (promptYrSelect) { promptYrSelect.innerHTML = yrHtml; promptYrSelect.value = currentYear; }
             }
-            setTimeout(refreshSelectArrows, 80);
         }
 
         function renderHeatmap() {
-            const grid = document.getElementById('heatmap-grid');
-            const ySelect = document.getElementById('heatmap-year-select');
-            const mSelect = document.getElementById('heatmap-month-select');
-            if (!ySelect.value || !mSelect.value) return;
-            const year = parseInt(ySelect.value);
-            const month = parseInt(mSelect.value);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const firstDayIndex = new Date(year, month, 1).getDay();
-            const offset = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
-            const loanCountPerDay = {};
-            trackingRecords.forEach(r => {
-                const d = new Date(r.date);
-                if (d.getFullYear() === year && d.getMonth() === month) {
-                    const key = d.getDate();
-                    loanCountPerDay[key] = (loanCountPerDay[key] || 0) + 1;
-                }
-            });
-            const counts = Object.values(loanCountPerDay);
-            const maxCount = counts.length > 0 ? Math.max(1, ...counts) : 1;
-            const theme = document.documentElement.getAttribute('data-theme') || 'light';
-            const totalCells = Math.ceil((daysInMonth + offset) / 7) * 7;
-            const cells = [];
+            const grid = document.getElementById('heatmap-grid'); const ySelect = document.getElementById('heatmap-year-select'); const mSelect = document.getElementById('heatmap-month-select');
+            if (!ySelect.value || !mSelect.value) return; const year = parseInt(ySelect.value); const month = parseInt(mSelect.value);
+            const daysInMonth = new Date(year, month + 1, 0).getDate(); const firstDayIndex = new Date(year, month, 1).getDay(); const offset = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+            const loanCountPerDay = {}; trackingRecords.forEach(r => { const d = new Date(r.date); if (d.getFullYear() === year && d.getMonth() === month) { const key = d.getDate(); loanCountPerDay[key] = (loanCountPerDay[key] || 0) + 1; } });
+            const counts = Object.values(loanCountPerDay); const maxCount = counts.length > 0 ? Math.max(1, ...counts) : 1; const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            const totalCells = Math.ceil((daysInMonth + offset) / 7) * 7; const cells = [];
             for (let i = 0; i < totalCells; i++) {
-                const dayIndex = i - offset;
-                let day = null,
-                    count = 0,
-                    isInRange = false;
-                if (dayIndex >= 0 && dayIndex < daysInMonth) {
-                    day = dayIndex + 1;
-                    count = loanCountPerDay[day] || 0;
-                    isInRange = true;
-                }
-                if (!isInRange) {
-                    cells.push(`<div class="heatmap-cell heatmap-cell-empty"></div>`);
-                } else {
-                    const intensity = count / maxCount;
-                    let r, g, b;
-                    if (theme === 'light') {
-                        r = Math.round(91 + (intensity * (255 - 91)));
-                        g = Math.round(74 + (intensity * (255 - 74)));
-                        b = Math.round(217 + (intensity * (255 - 217)));
-                    } else {
-                        r = Math.round(124 + (intensity * (224 - 124)));
-                        g = Math.round(108 + (intensity * (214 - 108)));
-                        b = Math.round(200 + (intensity * (255 - 200)));
-                    }
-                    const tooltip =
-                        `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')} : ${count} loans`;
-                    cells.push(
-                        `<div class="heatmap-cell shadow-sm" style="background: rgb(${r},${g},${b});" title="${tooltip}">${day}</div>`
-                        );
+                const dayIndex = i - offset; let day = null, count = 0, isInRange = false;
+                if (dayIndex >= 0 && dayIndex < daysInMonth) { day = dayIndex + 1; count = loanCountPerDay[day] || 0; isInRange = true; }
+                if (!isInRange) { cells.push(`<div class="heatmap-cell heatmap-cell-empty"></div>`); } else {
+                    const intensity = count / maxCount; let r, g, b;
+                    if (theme === 'light') { r = Math.round(91 + (intensity * (255 - 91))); g = Math.round(74 + (intensity * (255 - 74))); b = Math.round(217 + (intensity * (255 - 217))); }
+                    else { r = Math.round(124 + (intensity * (224 - 124))); g = Math.round(108 + (intensity * (214 - 108))); b = Math.round(200 + (intensity * (255 - 200))); }
+                    cells.push(`<div class="heatmap-cell shadow-sm" style="background: rgb(${r},${g},${b});" title="${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')} : ${count} loans">${day}</div>`);
                 }
             }
             grid.innerHTML = cells.join('');
         }
 
-        // ================================================================
-        // ACTIVE LOANS
-        // ================================================================
         function renderActiveLoans() {
-            const active = trackingRecords.filter(r => r.status === 'Dipinjam');
-            const grid = document.getElementById('active-loans-grid');
-            const empty = document.getElementById('active-empty');
-            grid.innerHTML = '';
-            if (!active.length) { grid.classList.add('hidden');
-                empty.classList.remove('hidden'); return; }
-            grid.classList.remove('hidden');
-            empty.classList.add('hidden');
+            const active = trackingRecords.filter(r => r.status === 'Dipinjam'); const grid = document.getElementById('active-loans-grid'); const empty = document.getElementById('active-empty'); grid.innerHTML = '';
+            if (!active.length) { grid.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+            grid.classList.remove('hidden'); empty.classList.add('hidden');
             active.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(loan => {
                 const days = Math.ceil(Math.abs(new Date() - new Date(loan.date)) / (1000 * 60 * 60 * 24));
-                const badgeClass = days > 7 ? 'bg-status-danger-bg text-status-danger-text border-status-danger-border' :
-                    'bg-status-warn-bg text-status-warn-text border-status-warn-border';
-                const badgeText = days > 7 ? tk('badge_overdue') : tk('badge_active');
-                const itemsHtml = loan.items.map(i =>
-                    `<li class="flex justify-between text-sm py-1.5 border-b border-brand-border/40 last:border-0"><span class="text-brand-muted">${i.name}</span><span class="font-bold text-brand-text">${i.qty} Unit</span></li>`
-                    ).join('');
-                grid.innerHTML += `
-                        <div class="glass rounded-2xl shadow-lg card-hover flex flex-col overflow-hidden">
-                            <div class="p-4 border-b border-brand-border flex justify-between items-start" style="background: var(--table-header-bg);">
-                                <div>
-                                    <h4 class="font-bold text-brand-text text-md mb-0.5">${loan.ticket}</h4>
-                                    <p class="text-xs text-brand-muted">${formatDate(loan.date)}</p>
-                                </div>
-                                <span class="px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-full border ${badgeClass}">${badgeText} (${days}d)</span>
-                            </div>
-                            <div class="p-4 flex-1">
-                                <p class="text-sm font-bold text-status-info-text mb-3 leading-tight">${loan.event}</p>
-                                <ul class="space-y-0.5">${itemsHtml}</ul>
-                            </div>
-                        </div>
-                    `;
+                const badgeClass = days > 7 ? 'bg-status-danger-bg text-status-danger-text border-status-danger-border' : 'bg-status-warn-bg text-status-warn-text border-status-warn-border';
+                const itemsHtml = loan.items.map(i => `<li class="flex justify-between text-sm py-1.5 border-b border-brand-border/40 last:border-0"><span class="text-brand-muted">${i.name}</span><span class="font-bold text-brand-text">${i.qty} Unit</span></li>`).join('');
+                grid.innerHTML += `<div class="glass rounded-2xl shadow-lg card-hover flex flex-col overflow-hidden"><div class="p-4 border-b border-brand-border flex justify-between items-start" style="background: var(--table-header-bg);"><div><h4 class="font-bold text-brand-text text-md mb-0.5">${loan.ticket}</h4><p class="text-xs text-brand-muted">${formatDate(loan.date)}</p></div><span class="px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-full border ${badgeClass}">${days > 7 ? tk('badge_overdue') : tk('badge_active')} (${days}d)</span></div><div class="p-4 flex-1"><p class="text-sm font-bold text-status-info-text mb-3 leading-tight">${loan.event}</p><ul class="space-y-0.5">${itemsHtml}</ul></div></div>`;
             });
         }
 
-        // ================================================================
-        // HISTORY
-        // ================================================================
         function renderHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
+            const list = document.getElementById('history-list'); list.innerHTML = '';
             [...trackingRecords].sort((a, b) => parseInt(b.id) - parseInt(a.id)).slice(0, 10).forEach(record => {
-                const color = record.status === 'Kembali' ?
-                    'text-status-success-text border-status-success-border bg-status-success-bg' :
-                    'text-status-warn-text border-status-warn-border bg-status-warn-bg';
-                const statusText = record.status === 'Kembali' ? tk('status_returned') : tk('status_borrowed');
-                list.innerHTML += `
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-brand-surface rounded-xl border border-brand-border transition hover:border-brand-primary shadow-sm">
-                            <div class="flex items-start space-x-4 mb-3 sm:mb-0">
-                                <span class="text-2xl mt-0.5">${record.status === 'Kembali' ? '✓' : '⚠'}</span>
-                                <div>
-                                    <h4 class="font-bold text-brand-text">${record.ticket} <span class="text-brand-muted text-xs font-normal ml-2">${formatDate(record.date)}</span></h4>
-                                    <p class="text-sm text-status-info-text mt-0.5 font-semibold">${record.event}</p>
-                                    <p class="text-xs text-brand-muted mt-1 truncate max-w-xs sm:max-w-md">${record.items.map(i => i.name).join(', ')}</p>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold uppercase tracking-widest ${color} px-3 py-1 rounded-full border">${statusText}</span>
-                        </div>
-                    `;
+                const color = record.status === 'Kembali' ? 'text-status-success-text border-status-success-border bg-status-success-bg' : 'text-status-warn-text border-status-warn-border bg-status-warn-bg';
+                list.innerHTML += `<div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-brand-surface rounded-xl border border-brand-border transition hover:border-brand-primary shadow-sm"><div class="flex items-start space-x-4 mb-3 sm:mb-0"><span class="text-2xl mt-0.5">${record.status === 'Kembali' ? '✓' : '⚠'}</span><div><h4 class="font-bold text-brand-text">${record.ticket} <span class="text-brand-muted text-xs font-normal ml-2">${formatDate(record.date)}</span></h4><p class="text-sm text-status-info-text mt-0.5 font-semibold">${record.event}</p><p class="text-xs text-brand-muted mt-1 truncate max-w-xs sm:max-w-md">${record.items.map(i => i.name).join(', ')}</p></div></div><span class="text-[10px] font-bold uppercase tracking-widest ${color} px-3 py-1 rounded-full border">${record.status === 'Kembali' ? tk('status_returned') : tk('status_borrowed')}</span></div>`;
             });
         }
 
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            try { return new Date(dateString).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'id-ID', { year: 'numeric',
-                    month: 'short', day: 'numeric' }); } catch (e) { return dateString; }
-        }
+        function formatDate(dateString) { if (!dateString) return ''; try { return new Date(dateString).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'id-ID', { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { return dateString; } }
 
         // ================================================================
         // DOM READY
         // ================================================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Apply theme
             const savedTheme = localStorage.getItem('binus_theme');
-            if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                document.documentElement.style.colorScheme = savedTheme; // Trigger native dropdown fix
+            } else {
+                document.documentElement.style.colorScheme = 'dark';
+            }
 
-            // Apply language
-            const savedLang = localStorage.getItem('binus_lang');
-            if (savedLang) { currentLang = savedLang; }
+            const savedLang = localStorage.getItem('binus_lang'); if (savedLang) { currentLang = savedLang; }
 
-            // Update UI
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const themeLabel = currentTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
-            document.getElementById('theme-text').innerText = themeLabel;
-            document.getElementById('login-theme-text').innerText = themeLabel;
-            document.getElementById('lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
-            document.getElementById('login-lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
+            document.getElementById('theme-text').innerText = themeLabel; document.getElementById('login-theme-text').innerText = themeLabel;
+            document.getElementById('lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID'; document.getElementById('login-lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
 
-            // Update status dropdowns
-            const optB = document.getElementById('opt-dipinjam');
-            if (optB) optB.innerText = tk('status_borrowed');
-            const optR = document.getElementById('opt-kembali');
-            if (optR) optR.innerText = tk('status_returned');
+            const optB = document.getElementById('opt-dipinjam'); if (optB) optB.innerText = tk('status_borrowed');
+            const optR = document.getElementById('opt-kembali'); if (optR) optR.innerText = tk('status_returned');
 
-            // Check session
             try {
                 const saved = localStorage.getItem('binus_current_session');
                 if (saved && saved !== "undefined") {
                     const u = JSON.parse(saved);
                     if (u && u.role) {
-                        // Session exists — apply role directly
                         applyRole(u);
-                        // Also ensure login page is hidden
-                        document.getElementById('login-page').classList.add('hidden');
-                        document.getElementById('login-page').classList.add('hidden-early');
+                        document.getElementById('login-page').classList.add('hidden', 'hidden-early');
                         document.getElementById('main-app').classList.add('show');
                     }
                 }
             } catch (e) { localStorage.removeItem('binus_current_session'); }
 
-            setupHeatmapSelectors();
-            renderUsers();
-            setTimeout(refreshSelectArrows, 200);
+            setupHeatmapSelectors(); renderUsers();
         });
     </script>
 </body>
