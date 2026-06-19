@@ -10,7 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Cek session SEBELUM render
+        // ================================================================
+        // PREVENT FLASH: Cek session SEBELUM render
+        // ================================================================
         (function() {
             try {
                 const saved = localStorage.getItem('binus_current_session');
@@ -466,7 +468,7 @@
 <body>
 
     <!-- ============================================================ -->
-    <!-- LOGIN PAGE — hidden-early kalo ada session -->
+    <!-- LOGIN PAGE -->
     <!-- ============================================================ -->
     <div id="login-page" class="login-bg px-4">
         <div class="login-cursor-glow" id="login-cursor-glow"></div>
@@ -631,18 +633,13 @@
         // USERS
         // ================================================================
         let appUsers = [];
-        try { appUsers = JSON.parse(localStorage.getItem(USER_DB_KEY)); if (!Array.isArray(appUsers)) throw new Error(); } catch (
-            e) { appUsers = []; }
+        try { appUsers = JSON.parse(localStorage.getItem(USER_DB_KEY)); if (!Array.isArray(appUsers)) throw new Error(); } catch (e) { appUsers = []; }
 
         const rootAdmin = appUsers.find(u => u.username === 'sewong');
-        if (!rootAdmin) { appUsers.push({ username: 'sewong', password: '_pR0t3<s3<uR3', role: 'admin' }); } else { rootAdmin
-                .password = '_pR0t3<s3<uR3'; }
-        if (!appUsers.find(u => u.username === 'alsut_view')) { appUsers.push({ username: 'alsut_view', password: '123',
-                role: 'viewer' }); }
+        if (!rootAdmin) { appUsers.push({ username: 'sewong', password: '_pR0t3<s3<uR3', role: 'admin' }); } else { rootAdmin.password = '_pR0t3<s3<uR3'; }
+        if (!appUsers.find(u => u.username === 'alsut_view')) { appUsers.push({ username: 'alsut_view', password: '123', role: 'viewer' }); }
         const csmViewer = appUsers.find(u => u.username === 'sdp.csm.alsut');
-        if (!csmViewer) { appUsers.push({ username: 'sdp.csm.alsut', password: '1dua3333V6tujuh', role: 'viewer' }); } else { csmViewer
-                .password = '1dua3333V6tujuh';
-            csmViewer.role = 'viewer'; }
+        if (!csmViewer) { appUsers.push({ username: 'sdp.csm.alsut', password: '1dua3333V6tujuh', role: 'viewer' }); } else { csmViewer.password = '1dua3333V6tujuh'; csmViewer.role = 'viewer'; }
         localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
 
         // ================================================================
@@ -654,9 +651,7 @@
             const orbs = stage.querySelectorAll('.login-orb');
             const glow = document.getElementById('login-cursor-glow');
             const depths = [26, 34, 20, 30];
-            let rafId = null,
-                px = 0.5,
-                py = 0.38;
+            let rafId = null, px = 0.5, py = 0.38;
 
             function apply() {
                 const nx = px - 0.5;
