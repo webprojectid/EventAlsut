@@ -115,6 +115,9 @@
             --status-danger-text: #BE123C;
             --status-danger-bg: rgba(244, 63, 94, 0.13);
             --status-danger-border: rgba(244, 63, 94, 0.35);
+            --coming-soon-badge-bg: rgba(245, 158, 11, 0.12);
+            --coming-soon-badge-border: rgba(245, 158, 11, 0.30);
+            --coming-soon-badge-text: #B45309;
         }
 
         [data-theme="dark"] {
@@ -166,6 +169,9 @@
             --status-danger-text: #FB7185;
             --status-danger-bg: rgba(244, 63, 94, 0.12);
             --status-danger-border: rgba(244, 63, 94, 0.32);
+            --coming-soon-badge-bg: rgba(245, 158, 11, 0.14);
+            --coming-soon-badge-border: rgba(245, 158, 11, 0.28);
+            --coming-soon-badge-text: #FBBF24;
         }
 
         * { box-sizing: border-box; }
@@ -286,6 +292,8 @@
             margin-top: 0.5rem;
             font-weight: 500;
         }
+
+        /* ===== BADGE STYLING ===== */
         .menu-card .menu-badge {
             position: absolute;
             top: 1rem;
@@ -300,37 +308,29 @@
             color: white;
             opacity: 0.9;
         }
+
+        /* ===== COMING SOON BADGE (tanpa overlay) ===== */
+        .menu-card .coming-soon-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background: var(--coming-soon-badge-bg);
+            border: 1px solid var(--coming-soon-badge-border);
+            color: var(--coming-soon-badge-text);
+            opacity: 0.9;
+        }
+
         .menu-card.coming-soon {
             cursor: default;
             opacity: 0.85;
         }
         .menu-card.coming-soon:hover { transform: translateY(-4px); }
-        .menu-card .coming-soon-overlay {
-            position: absolute;
-            inset: 0;
-            border-radius: 1.5rem;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            pointer-events: none;
-        }
-        .menu-card.coming-soon .coming-soon-overlay { pointer-events: auto; }
-        .menu-card .coming-soon-overlay span {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 0.5rem 1.5rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .menu-card .coming-soon-overlay .cs-icon { font-size: 3rem; margin-bottom: 0.75rem; }
 
         .btn-outline {
             border: 1px solid var(--glass-border);
@@ -550,23 +550,17 @@
                     <div class="menu-badge">Active</div>
                 </a>
 
-                <!-- Card 2: Peminjaman Barang (Coming Soon) -->
+                <!-- Card 2: Peminjaman Barang (Coming Soon) — BADGE DI POJOK -->
                 <a href="item.html" class="menu-card coming-soon no-underline">
-                    <div class="coming-soon-overlay">
-                        <div class="cs-icon">🚧</div>
-                        <span>Coming Soon</span>
-                    </div>
+                    <div class="coming-soon-badge">Coming Soon</div>
                     <div class="menu-icon">📦</div>
                     <div class="menu-title">Peminjaman Barang</div>
                     <div class="menu-desc">Kelola peminjaman barang dan aset</div>
                 </a>
 
-                <!-- Card 3: Stock Opname (Coming Soon) -->
+                <!-- Card 3: Stock Opname (Coming Soon) — BADGE DI POJOK -->
                 <a href="stock.html" class="menu-card coming-soon no-underline">
-                    <div class="coming-soon-overlay">
-                        <div class="cs-icon">🚧</div>
-                        <span>Coming Soon</span>
-                    </div>
+                    <div class="coming-soon-badge">Coming Soon</div>
                     <div class="menu-icon">📊</div>
                     <div class="menu-title">Stock Opname</div>
                     <div class="menu-desc">Cek dan rekap stok barang</div>
