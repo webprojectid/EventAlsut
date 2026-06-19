@@ -10,6 +10,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Cek session SEBELUM render
+        (function() {
+            try {
+                const saved = localStorage.getItem('binus_current_session');
+                if (saved && saved !== "undefined") {
+                    const u = JSON.parse(saved);
+                    if (u && u.role) {
+                        window.__SESSION_VALID = true;
+                        window.__SESSION_USER = u;
+                    }
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -371,6 +386,7 @@
             animation: auroraDrift 30s ease-in-out infinite alternate;
             transition: background-color 0.4s ease;
         }
+        .login-bg.hidden-early { display: none !important; }
         .login-bg.hidden { display: none; }
 
         .login-cursor-glow {
@@ -434,9 +450,6 @@
         }
         .btn-primary:active { transform: translateY(0) scale(0.99); }
 
-        .badge-status { transition: all 0.2s ease; }
-        .badge-status:hover { transform: scale(1.05); }
-
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--brand-surface); }
         ::-webkit-scrollbar-thumb { background: var(--brand-primary); border-radius: 8px; }
@@ -453,7 +466,7 @@
 <body>
 
     <!-- ============================================================ -->
-    <!-- LOGIN PAGE -->
+    <!-- LOGIN PAGE — hidden-early kalo ada session -->
     <!-- ============================================================ -->
     <div id="login-page" class="login-bg px-4">
         <div class="login-cursor-glow" id="login-cursor-glow"></div>
@@ -586,6 +599,18 @@
 
     <script>
         // ================================================================
+        // APPLY EARLY HIDDEN IF SESSION EXISTS
+        // ================================================================
+        (function() {
+            if (window.__SESSION_VALID) {
+                const loginPage = document.getElementById('login-page');
+                if (loginPage) loginPage.classList.add('hidden-early');
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) mainContent.classList.add('show');
+            }
+        })();
+
+        // ================================================================
         // CONSTANTS
         // ================================================================
         const USER_DB_KEY = 'binus_users_db';
@@ -596,18 +621,8 @@
         // DICTIONARY
         // ================================================================
         const translations = {
-            en: {
-                theme_dark: 'Dark',
-                theme_light: 'Light',
-                opt_viewer: 'View Only',
-                opt_admin: 'Admin'
-            },
-            id: {
-                theme_dark: 'Gelap',
-                theme_light: 'Terang',
-                opt_viewer: 'Hanya Lihat',
-                opt_admin: 'Admin'
-            }
+            en: { theme_dark: 'Dark', theme_light: 'Light', opt_viewer: 'View Only', opt_admin: 'Admin' },
+            id: { theme_dark: 'Gelap', theme_light: 'Terang', opt_viewer: 'Hanya Lihat', opt_admin: 'Admin' }
         };
 
         function tk(key) { return translations[currentLang][key] || key; }
@@ -690,15 +705,16 @@
         function applyRole(userObj) {
             currentUser = userObj;
             localStorage.setItem('binus_current_session', JSON.stringify(userObj));
+            const isAdm = userObj.role === 'admin';
 
             document.getElementById('user-display-name').innerText = userObj.username;
             const badge = document.getElementById('user-role-badge');
-            const isAdm = userObj.role === 'admin';
             badge.innerText = isAdm ? tk('opt_admin') : tk('opt_viewer');
             badge.className =
                 `text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${isAdm ? 'border-status-success-border text-status-success-text' : 'border-status-info-border text-status-info-text'}`;
 
             document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('login-page').classList.add('hidden-early');
             document.getElementById('main-content').classList.add('show');
         }
 
@@ -706,6 +722,7 @@
             localStorage.removeItem('binus_current_session');
             currentUser = null;
             document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('login-page').classList.remove('hidden-early');
             document.getElementById('main-content').classList.remove('show');
             document.getElementById('login-form').reset();
             document.getElementById('login-error').classList.add('hidden');
@@ -722,18 +739,18 @@
             const themeLabel = newTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
             document.getElementById('theme-text').innerText = themeLabel;
             document.getElementById('login-theme-text').innerText = themeLabel;
+            localStorage.setItem('binus_theme', newTheme);
         }
 
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'id' : 'en';
             document.getElementById('lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
             document.getElementById('login-lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
-
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const themeLabel = currentTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
             document.getElementById('theme-text').innerText = themeLabel;
             document.getElementById('login-theme-text').innerText = themeLabel;
-
+            localStorage.setItem('binus_lang', currentLang);
             if (currentUser) {
                 const isAdm = currentUser.role === 'admin';
                 const badge = document.getElementById('user-role-badge');
@@ -745,15 +762,12 @@
         // INIT
         // ================================================================
         window.onload = function() {
-            // Apply theme from localStorage or default
             const savedTheme = localStorage.getItem('binus_theme');
             if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
 
-            // Apply language
             const savedLang = localStorage.getItem('binus_lang');
             if (savedLang) { currentLang = savedLang; }
 
-            // Update UI
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const themeLabel = currentTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
             document.getElementById('theme-text').innerText = themeLabel;
@@ -765,24 +779,12 @@
                 const saved = localStorage.getItem('binus_current_session');
                 if (saved && saved !== "undefined") {
                     const u = JSON.parse(saved);
-                    if (u && u.role) applyRole(u);
+                    if (u && u.role) {
+                        applyRole(u);
+                    }
                 }
             } catch (e) { localStorage.removeItem('binus_current_session'); }
         };
-
-        // Save theme preference
-        document.addEventListener('DOMContentLoaded', function() {
-            const observer = new MutationObserver(function() {
-                const theme = document.documentElement.getAttribute('data-theme') || 'light';
-                localStorage.setItem('binus_theme', theme);
-            });
-            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        });
-
-        // Save language preference
-        setInterval(function() {
-            localStorage.setItem('binus_lang', currentLang);
-        }, 1000);
     </script>
 </body>
 </html>
