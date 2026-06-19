@@ -12,9 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- ============================================================ -->
-    <!-- PREVENT FLASH: Cek session SEBELUM render -->
-    <!-- ============================================================ -->
     <script>
         (function() {
             try {
@@ -82,7 +79,7 @@
     <style>
         :root,
         [data-theme="light"] {
-            color-scheme: light; /* Mencegah dropdown bawaan berwarna gelap/abu kusam */
+            color-scheme: light;
             --brand-bg: #F4F6FC;
             --brand-bg-2: #ECEFFC;
             --brand-surface: #FFFFFF;
@@ -148,7 +145,7 @@
         }
 
         [data-theme="dark"] {
-            color-scheme: dark; /* Memaksa scrollbar dan dropdown bawaan menjadi gelap elegan */
+            color-scheme: dark;
             --brand-bg: #0A0714;
             --brand-bg-2: #120B26;
             --brand-surface: #120D22;
@@ -223,10 +220,7 @@
             min-height: 100vh;
         }
 
-        #main-app {
-            position: relative;
-            z-index: 1;
-        }
+        #main-app { position: relative; z-index: 1; }
         #login-page { z-index: 50; }
         #login-page.hidden-early { display: none !important; }
         #main-app.show { display: flex !important; }
@@ -297,7 +291,6 @@
         .stat-card { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .stat-card:hover { transform: translateY(-4px); border-color: var(--brand-primary); box-shadow: 0 16px 40px var(--brand-glow-strong), inset 0 1px 0 var(--card-glass-highlight), inset 0 0 0 1px var(--card-glass-border-soft) !important; }
 
-        /* Nav Item Styles for Header */
         .nav-btn {
             padding: 0.5rem 1rem;
             border-radius: 0.75rem;
@@ -339,7 +332,6 @@
         .input-modern:focus { border-color: var(--form-focus-border); box-shadow: 0 0 0 3px var(--form-focus-shadow); outline: none; }
         .input-modern::placeholder { color: var(--form-placeholder); font-weight: 400; }
 
-        /* PERFECT DROPDOWN STYLING */
         select.input-modern,
         select.item-select,
         #heatmap-month-select,
@@ -533,9 +525,6 @@
 </head>
 <body>
 
-    <!-- ============================================================ -->
-    <!-- LOGIN PAGE -->
-    <!-- ============================================================ -->
     <div id="login-page" class="login-bg px-4">
         <div class="login-cursor-glow" id="login-cursor-glow"></div>
         <div class="login-orb login-orb-1"></div>
@@ -577,19 +566,17 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- MAIN APP -->
-    <!-- ============================================================ -->
     <div id="main-app" class="flex-col h-screen overflow-hidden bg-brand-bg aurora-surface">
         
-        <!-- ============================================================ -->
-        <!-- HEADER NAVBAR -->
-        <!-- ============================================================ -->
         <header class="flex-none header-glass z-30 w-full sticky top-0 px-4 py-3 lg:px-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 
-                <!-- Kiri: Logo & Title -->
                 <div class="flex items-center justify-between md:justify-start gap-4">
+                    
+                    <a href="index.html" class="flex items-center justify-center w-9 h-9 rounded-xl bg-brand-surface border border-brand-border text-brand-text hover:bg-brand-glow hover:border-brand-primary transition shadow-sm group" title="Kembali ke Main Menu">
+                        <svg class="text-brand-muted group-hover:text-brand-primary transition" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </a>
+
                     <div class="flex items-center space-x-3 cursor-pointer" onclick="navigate('dashboard')">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center font-extrabold text-white shadow-lg">AS</div>
                         <div>
@@ -601,13 +588,11 @@
                         </div>
                     </div>
                     
-                    <!-- Mobile Right Area (Theme/Lang/Logout on mobile) -->
                     <div class="flex items-center gap-2 md:hidden">
                         <span class="live-badge scale-90 origin-right"><span class="live-dot"></span><span class="live-text">LIVE</span></span>
                     </div>
                 </div>
 
-                <!-- Tengah: Navigation Menu -->
                 <nav class="flex items-center overflow-x-auto no-scrollbar gap-1 py-1 md:py-0 w-full md:w-auto md:flex-1 md:justify-center">
                     <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn active">Dashboard</button>
                     <button onclick="navigate('database')" id="nav-database" class="nav-btn">Data & Form</button>
@@ -617,7 +602,6 @@
                     <button onclick="navigate('settings')" id="nav-settings" class="nav-btn admin-only">Settings</button>
                 </nav>
 
-                <!-- Kanan: Controls & User -->
                 <div class="flex items-center justify-end gap-2 flex-shrink-0 border-t border-brand-border md:border-0 pt-2 md:pt-0 mt-1 md:mt-0">
                     <span class="live-badge hidden md:inline-flex mr-2"><span class="live-dot"></span><span class="live-text">LIVE</span></span>
                     <span class="text-xs font-bold text-brand-text hidden lg:inline-block mr-2 truncate max-w-[100px]" id="user-display-name">User</span>
@@ -635,13 +619,9 @@
             </div>
         </header>
 
-        <!-- ============================================================ -->
-        <!-- MAIN CONTENT AREA -->
-        <!-- ============================================================ -->
         <main class="flex-1 overflow-y-auto relative w-full px-4 sm:px-6 md:px-8 py-6 pb-24">
             <div class="max-w-7xl mx-auto space-y-8">
 
-                <!-- VIEW: DASHBOARD -->
                 <div id="view-dashboard" class="view-transition space-y-7">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text">Executive Dashboard</h2>
@@ -722,7 +702,6 @@
                     </div>
                 </div>
 
-                <!-- VIEW: DATABASE -->
                 <div id="view-database" class="hidden view-transition space-y-6">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text">Data & Form Input</h2>
@@ -784,7 +763,6 @@
                                 <h3 class="text-md font-bold text-brand-text">Database Summary</h3>
                                 <input type="text" id="table-search" oninput="renderTableResetPage()" class="w-full sm:w-64 px-4 py-2.5 rounded-xl input-modern text-brand-text text-sm" placeholder="Quick filter ..." />
                             </div>
-                            <!-- TABEL TANPA SCROLL HORIZONTAL (Responsive Action Column) -->
                             <div class="flex-1 overflow-y-auto no-scrollbar">
                                 <table class="w-full text-left border-collapse table-auto">
                                     <thead class="sticky top-0 z-10 border-b border-brand-border" style="background: var(--table-header-bg);">
@@ -814,7 +792,6 @@
                     </div>
                 </div>
 
-                <!-- VIEW: ACTIVE LOANS -->
                 <div id="view-active-loans" class="hidden view-transition space-y-6">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text flex items-center">
@@ -830,7 +807,6 @@
                     </div>
                 </div>
 
-                <!-- VIEW: TOOLS -->
                 <div id="view-tools" class="hidden view-transition space-y-6">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text">⌕ Search & Export</h2>
@@ -926,7 +902,6 @@
                     </div>
                 </div>
 
-                <!-- VIEW: HISTORY -->
                 <div id="view-history" class="hidden view-transition space-y-6">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text">↻ Recent History</h2>
@@ -937,7 +912,6 @@
                     </div>
                 </div>
 
-                <!-- VIEW: SETTINGS -->
                 <div id="view-settings" class="hidden view-transition space-y-6 admin-only">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-text">⚙ System Settings</h2>
@@ -993,9 +967,6 @@
         </main>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- JAVASCRIPT — ALL LOGIC -->
-    <!-- ============================================================ -->
     <script>
         // ================================================================
         // PREVENT FLASH
@@ -1075,7 +1046,7 @@
             const currentTheme = html.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             html.setAttribute('data-theme', newTheme);
-            html.style.colorScheme = newTheme; // Force dropdown/scroll styling
+            html.style.colorScheme = newTheme; 
             
             const themeLabel = newTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
             document.getElementById('theme-text').innerText = themeLabel;
@@ -1173,14 +1144,14 @@
             navigate('dashboard');
         }
 
+        // ================================================================
+        // CENTRALIZED LOGOUT LOGIC
+        // ================================================================
         function handleLogout() {
             localStorage.removeItem('binus_current_session');
             currentUser = null;
-            document.getElementById('login-page').classList.remove('hidden');
-            document.getElementById('login-page').classList.remove('hidden-early');
-            document.getElementById('main-app').classList.remove('show');
-            document.getElementById('login-form').reset();
-            document.getElementById('login-error').classList.add('hidden');
+            // Kembali ke index.html supaya semua user yang logout kembali ke pintu utama (Main Menu Login)
+            window.location.href = 'index.html';
         }
 
         function renderUsers() {
@@ -1235,7 +1206,7 @@
         }
 
         // ================================================================
-        // EXCEL IMPORT & EXPORT ... (Sama dengan script sebelumnya)
+        // EXCEL IMPORT & EXPORT
         // ================================================================
         function importExcel() {
             const fileInput = document.getElementById('import-file');
@@ -1345,7 +1316,7 @@
         }
 
         // ================================================================
-        // TABLE RENDER (TANPA HORIZONTAL SCROLL)
+        // TABLE RENDER
         // ================================================================
         function renderTableResetPage() { currentPage = 1; renderTable(); }
 
@@ -1385,7 +1356,6 @@
                         <td class="py-3 px-3">
                             <div class="text-brand-text font-bold text-xs sm:text-sm mb-1">${record.event}</div>
                             <div class="flex flex-wrap">${itemsHtml}</div>
-                            <!-- Mobile status display -->
                             <div class="mt-2 sm:hidden inline-block px-2 py-0.5 text-[9px] uppercase font-extrabold tracking-wide rounded border ${statusClass}">${statusText}</div>
                         </td>
                         <td class="py-3 px-3 text-center hidden sm:table-cell">
@@ -1467,7 +1437,7 @@
         }
 
         // ================================================================
-        // DASHBOARD RENDER & CHART ... (Logika Chart Sama Persis)
+        // DASHBOARD RENDER & CHART
         // ================================================================
         function renderDashboard() {
             const total = trackingRecords.length; const active = trackingRecords.filter(r => r.status === 'Dipinjam').length; const done = trackingRecords.filter(r => r.status === 'Kembali').length;
@@ -1570,7 +1540,7 @@
             const savedTheme = localStorage.getItem('binus_theme');
             if (savedTheme) {
                 document.documentElement.setAttribute('data-theme', savedTheme);
-                document.documentElement.style.colorScheme = savedTheme; // Trigger native dropdown fix
+                document.documentElement.style.colorScheme = savedTheme;
             } else {
                 document.documentElement.style.colorScheme = 'dark';
             }
