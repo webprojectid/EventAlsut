@@ -1126,7 +1126,7 @@
                     const info = await res.json();
 
                     if (info.found) {
-                        injectScannedData(info.assetNo || fa, info.assetName || "", info.serialNumber || "");
+                        injectScannedData(info.assetNo || fa, info.brand || "", info.serialNumber || "");
                     } else {
                         alert("AssetNo " + fa + " gak ketemu di sistem finance. FA tetep diisi, Nama/S-N isi manual ya.");
                         injectScannedData(fa, "", "");
