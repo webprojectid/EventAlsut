@@ -492,23 +492,6 @@
         .sso-btn svg { width: 24px; height: 24px; flex-shrink: 0; }
         .sso-btn.google svg { width: 22px; height: 22px; }
 
-        /* PERBAIKAN: Buat tombol Google selebar dan simetris dengan Microsoft */
-        .g_id_signin {
-            display: block !important;
-            width: 100% !important;
-            text-align: center !important;
-        }
-        .g_id_signin > div {
-            display: flex !important;
-            justify-content: center !important;
-            width: 100% !important;
-        }
-        .g_id_signin iframe {
-            width: 100% !important;
-            max-width: 100% !important;
-            min-width: 100% !important;
-        }
-
         .divider {
             display: flex;
             align-items: center;
@@ -579,26 +562,30 @@
                  data-callback="handleGoogleLogin"
                  data-auto_prompt="false">
             </div>
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="pill"
-                 data-theme="outline"
-                 data-text="signin_with"
-                 data-size="large"
-                 data-logo_alignment="left"
-                 data-width="100%">
-            </div>
+            
+            <!-- PERBAIKAN: Bungkus di dalam flex agar lebar dan ukuran sama/simetris -->
+            <div class="flex flex-col items-center w-full gap-3 mt-4">
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="outline"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="center"
+                     data-width="300">
+                </div>
 
-            <!-- TOMBOL MICROSOFT (placeholder) -->
-            <button onclick="loginMicrosoft()" class="sso-btn microsoft mt-3" style="gap:0.75rem;">
-                <svg viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="1" width="9" height="9" fill="#F25022" />
-                    <rect x="12" y="1" width="9" height="9" fill="#7FBA00" />
-                    <rect x="1" y="12" width="9" height="9" fill="#00A4EF" />
-                    <rect x="12" y="12" width="9" height="9" fill="#FFB900" />
-                </svg>
-                <span>Sign in with Microsoft</span>
-            </button>
+                <!-- TOMBOL MICROSOFT (placeholder) -->
+                <button onclick="loginMicrosoft()" class="sso-btn microsoft !w-[300px] !mt-0" style="gap:0.75rem;">
+                    <svg viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+                        <rect x="12" y="1" width="9" height="9" fill="#7FBA00" />
+                        <rect x="1" y="12" width="9" height="9" fill="#00A4EF" />
+                        <rect x="12" y="12" width="9" height="9" fill="#FFB900" />
+                    </svg>
+                    <span>Sign in with Microsoft</span>
+                </button>
+            </div>
 
             <div class="flex items-center justify-center space-x-3 pt-6">
                 <button onclick="toggleTheme()" class="px-4 py-2 rounded-xl bg-brand-surface border border-brand-border text-xs font-bold text-brand-text transition hover:bg-brand-glow shadow-sm">
@@ -742,6 +729,18 @@
         localStorage.setItem(USER_DB_KEY, JSON.stringify(appUsers));
 
         // ================================================================
+        // FUNGSI TRANISI DOM UNTUK MENCEGAH FLICKERING SAAT LOGIN
+        // ================================================================
+        function showMainMenu(user) {
+            document.getElementById('login-page').classList.add('hidden-early');
+            document.getElementById('main-content').classList.add('show');
+            document.getElementById('user-display-name').innerText = user.username;
+            const badge = document.getElementById('user-role-badge');
+            badge.innerText = user.role === 'admin' ? 'Admin' : 'View Only';
+            badge.className = `text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${user.role === 'admin' ? 'border-status-success-border text-status-success-text' : 'border-status-info-border text-status-info-text'}`;
+        }
+
+        // ================================================================
         // FUNGSI LOGIN LOKAL
         // ================================================================
         function handleLogin(e) {
@@ -758,12 +757,14 @@
         }
 
         // ================================================================
-        // FUNGSI OTORISASI UMUM (SEKARANG REDIRECT KE INDEX.HTML)
+        // FUNGSI OTORISASI UMUM (MEMANGGIL TRANISI DOM)
         // ================================================================
         function applyRole(userObj) {
             localStorage.setItem('binus_current_session', JSON.stringify(userObj));
-            // 🔥 PERBAIKAN: Redirect ke index.html (main menu), bukan event.html
-            window.location.href = 'index.html';
+            // PERBAIKAN: Gunakan DOM Update instan alih-alih redirect URL
+            window.__SESSION_VALID = true;
+            window.__SESSION_USER = userObj;
+            showMainMenu(userObj); 
         }
 
         // ================================================================
@@ -778,8 +779,11 @@
                 const role = adminEmails.includes(email) ? 'admin' : 'viewer';
                 const userObj = { username: email, role: role };
                 localStorage.setItem('binus_current_session', JSON.stringify(userObj));
-                // 🔥 PERBAIKAN: Redirect ke index.html (main menu)
-                window.location.href = 'index.html';
+                
+                // PERBAIKAN: Gunakan DOM Update instan alih-alih redirect URL
+                window.__SESSION_VALID = true;
+                window.__SESSION_USER = userObj;
+                showMainMenu(userObj); 
             } else {
                 alert('❌ Email kamu belum diberikan akses untuk menggunakan website ini.');
                 google.accounts.id.disableAutoSelect();
@@ -807,7 +811,7 @@
 
         async function loginMicrosoft() {
             alert('Login Microsoft belum aktif. Ganti YOUR_MICROSOFT_CLIENT_ID dengan Client ID dari Azure.');
-            // Nanti kalau sudah punya Client ID, aktifkan kode di bawah (dan ubah redirect ke index.html)
+            // Nanti kalau sudah punya Client ID, aktifkan kode di bawah (dan ubah cara loginnya biar panggil showMainMenu juga)
             /*
             try {
                 const response = await msalInstance.loginPopup({ scopes: ['User.Read'], prompt: 'select_account' });
@@ -817,7 +821,10 @@
                     const role = adminEmails.includes(email) ? 'admin' : 'viewer';
                     const userObj = { username: email, role: role };
                     localStorage.setItem('binus_current_session', JSON.stringify(userObj));
-                    window.location.href = 'index.html'; // 🔥 Redirect ke main menu
+                    
+                    window.__SESSION_VALID = true;
+                    window.__SESSION_USER = userObj;
+                    showMainMenu(userObj); // <-- Gunakan DOM Update instan
                 } else {
                     alert('❌ Email kamu belum diberikan akses untuk menggunakan website ini.');
                     await msalInstance.logoutPopup();
