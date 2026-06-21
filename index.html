@@ -57,10 +57,14 @@
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
                         'scale-in': 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                        'page-in': 'pageIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                        'page-out': 'pageOut 0.5s ease-out forwards',
                     },
                     keyframes: {
                         float: { '0%,100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-8px)' } },
                         scaleIn: { '0%': { opacity: '0', transform: 'scale(0.92)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+                        pageIn: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        pageOut: { '0%': { opacity: '1', transform: 'translateY(0)' }, '100%': { opacity: '0', transform: 'translateY(-20px)' } },
                     }
                 }
             }
@@ -159,6 +163,8 @@
             --form-focus-border: #8B5CF6;
             --form-focus-shadow: rgba(139, 92, 246, 0.35);
             --form-select-arrow: #8B5CF6;
+            --form-placeholder: #6B6190;
+            --form-disabled: #120D22;
             --status-info-text: #38BDF8;
             --status-info-bg: rgba(14, 165, 233, 0.12);
             --status-info-border: rgba(14, 165, 233, 0.32);
@@ -457,14 +463,14 @@
         ::-webkit-scrollbar-thumb { background: var(--brand-primary); border-radius: 8px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary-light); }
 
-        .view-transition { animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .view-transition { animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes scaleIn { 0% { opacity: 0; transform: scale(0.92); } 100% { opacity: 1; transform: scale(1); } }
         @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 
         #main-content { display: none; }
-        #main-content.show { display: block; }
+        #main-content.show { display: block; animation: pageIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        #main-content.page-out { animation: pageOut 0.5s ease-out forwards; }
 
-        /* ===== TAMBAHAN UNTUK TOMBOL SSO (agar selaras dengan desain) ===== */
         .sso-btn {
             display: flex;
             align-items: center;
@@ -513,6 +519,19 @@
         }
 
         .no-underline { text-decoration: none; }
+
+        /* PAGE TRANSITION STYLES */
+        .nav-link {
+            position: relative;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-link.prevent-default {
+            pointer-events: none;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
@@ -626,7 +645,7 @@
             <!-- Menu Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <a href="event.html" class="menu-card no-underline">
+                <a href="event.html" class="menu-card no-underline nav-link" data-transition="true">
                     <div class="menu-icon">📋</div>
                     <div class="menu-title">Peminjaman Event</div>
                     <div class="menu-desc">Kelola peminjaman untuk event dan kegiatan</div>
@@ -647,7 +666,7 @@
                     <div class="menu-desc">Cek dan rekap stok barang</div>
                 </a>
 
-                <a href="receipt.html" class="menu-card no-underline">
+                <a href="receipt.html" class="menu-card no-underline nav-link" data-transition="true">
                     <div class="menu-icon">📄</div>
                     <div class="menu-title">Tanda Terima Barang</div>
                     <div class="menu-desc">Buat dan cetak bukti serah terima aset</div>
@@ -683,6 +702,30 @@
 
     <script>
         // ================================================================
+        // PAGE TRANSITION HANDLER
+        // ================================================================
+        function setupPageTransitions() {
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a.nav-link[data-transition="true"]');
+                if (!link) return;
+                
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#')) return;
+                
+                e.preventDefault();
+                
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.classList.add('page-out');
+                    
+                    setTimeout(function() {
+                        window.location.href = href;
+                    }, 500);
+                }
+            });
+        }
+
+        // ================================================================
         // SCRIPT LOGIN LOKAL + GOOGLE + MICROSOFT
         // ================================================================
 
@@ -690,7 +733,7 @@
         // KONFIGURASI
         // ================================================================
         const CONFIG = {
-            microsoftClientId: 'YOUR_MICROSOFT_CLIENT_ID', // Ganti nanti
+            microsoftClientId: 'YOUR_MICROSOFT_CLIENT_ID',
             googleClientId: '764409797584-g1gb27vmfmk21hfqab5tjelf02uh8bp4.apps.googleusercontent.com',
         };
 
@@ -761,7 +804,6 @@
         // ================================================================
         function applyRole(userObj) {
             localStorage.setItem('binus_current_session', JSON.stringify(userObj));
-            // PERBAIKAN: Gunakan DOM Update instan alih-alih redirect URL
             window.__SESSION_VALID = true;
             window.__SESSION_USER = userObj;
             showMainMenu(userObj); 
@@ -780,7 +822,6 @@
                 const userObj = { username: email, role: role };
                 localStorage.setItem('binus_current_session', JSON.stringify(userObj));
                 
-                // PERBAIKAN: Gunakan DOM Update instan alih-alih redirect URL
                 window.__SESSION_VALID = true;
                 window.__SESSION_USER = userObj;
                 showMainMenu(userObj); 
@@ -811,31 +852,6 @@
 
         async function loginMicrosoft() {
             alert('Login Microsoft belum aktif. Ganti YOUR_MICROSOFT_CLIENT_ID dengan Client ID dari Azure.');
-            // Nanti kalau sudah punya Client ID, aktifkan kode di bawah (dan ubah cara loginnya biar panggil showMainMenu juga)
-            /*
-            try {
-                const response = await msalInstance.loginPopup({ scopes: ['User.Read'], prompt: 'select_account' });
-                const email = response.account.username;
-                if (ALLOWED_EMAILS.includes(email)) {
-                    const adminEmails = ['teguh93new@gmail.com', 'teguhends@gmail.com'];
-                    const role = adminEmails.includes(email) ? 'admin' : 'viewer';
-                    const userObj = { username: email, role: role };
-                    localStorage.setItem('binus_current_session', JSON.stringify(userObj));
-                    
-                    window.__SESSION_VALID = true;
-                    window.__SESSION_USER = userObj;
-                    showMainMenu(userObj); // <-- Gunakan DOM Update instan
-                } else {
-                    alert('❌ Email kamu belum diberikan akses untuk menggunakan website ini.');
-                    await msalInstance.logoutPopup();
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                if (error.errorCode !== 'user_cancelled') {
-                    alert('Terjadi kesalahan saat login. Coba lagi.');
-                }
-            }
-            */
         }
 
         // ================================================================
@@ -868,7 +884,7 @@
         }
 
         // ================================================================
-        // CEK SESSION SAAT LOAD (DIPERBAIKI BIAR INSTAN & BISA BACK)
+        // CEK SESSION SAAT LOAD (DENGAN PAGESHOW FIX!)
         // ================================================================
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('binus_theme');
@@ -889,6 +905,50 @@
                 const badge = document.getElementById('user-role-badge');
                 badge.innerText = user.role === 'admin' ? 'Admin' : 'View Only';
                 badge.className = `text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border ${user.role === 'admin' ? 'border-status-success-border text-status-success-text' : 'border-status-info-border text-status-info-text'}`;
+            }
+
+            // Setup page transitions
+            setupPageTransitions();
+        });
+
+        // ================================================================
+        // FIX: PAGESHOW EVENT - SELALU CHECK SESSION SAAT PAGE DITAMPILKAN
+        // (fix browser cache issue ketika back dari event.html/receipt.html)
+        // ================================================================
+        window.addEventListener('pageshow', function(e) {
+            try {
+                const saved = localStorage.getItem('binus_current_session');
+                if (saved && saved !== "undefined") {
+                    const u = JSON.parse(saved);
+                    if (u && u.role) {
+                        // Session valid, tampilkan main menu
+                        window.__SESSION_VALID = true;
+                        window.__SESSION_USER = u;
+                        document.getElementById('login-page').classList.add('hidden-early');
+                        document.getElementById('main-content').classList.add('show');
+                        document.getElementById('main-content').classList.remove('page-out');
+                        
+                        // Update user display
+                        document.getElementById('user-display-name').innerText = u.username;
+                        const badge = document.getElementById('user-role-badge');
+                        badge.innerText = u.role === 'admin' ? 'Admin' : 'View Only';
+                        badge.className = u.role === 'admin' ?
+                            'text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border border-status-success-border text-status-success-text' :
+                            'text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border border-status-info-border text-status-info-text';
+                        
+                        setupPageTransitions();
+                    } else {
+                        throw new Error("Invalid session");
+                    }
+                } else {
+                    throw new Error("No session");
+                }
+            } catch (err) {
+                // Session tidak valid, tampilkan login page
+                window.__SESSION_VALID = false;
+                window.__SESSION_USER = null;
+                document.getElementById('login-page').classList.remove('hidden-early');
+                document.getElementById('main-content').classList.remove('show');
             }
         });
     </script>
