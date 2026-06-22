@@ -1163,34 +1163,29 @@
 
                             <!-- ===== DOWNLOAD BUTTONS ===== -->
                             <div class="flex gap-2">
-                                <button type="button" onclick="downloadReceipt()" id="download-btn" class="w-1/3 py-2.5 rounded-xl bg-status-success-text hover:opacity-90 text-white font-bold transition shadow-lg text-sm flex items-center justify-center gap-2" disabled>
+                                <button type="button" onclick="downloadReceipt()" id="download-btn" class="w-1/2 py-2.5 rounded-xl bg-status-success-text hover:opacity-90 text-white font-bold transition shadow-lg text-sm flex items-center justify-center gap-2" disabled>
                                     ⬇ Download PNG
                                 </button>
-                                <button type="button" onclick="printReceipt()" id="print-btn" class="w-1/3 py-2.5 rounded-xl bg-status-info-text hover:opacity-90 text-white font-bold transition shadow-lg text-sm flex items-center justify-center gap-2" disabled>
-                                    🖨 Print
-                                </button>
-                                <button type="button" onclick="downloadDocx()" id="download-docx-btn" class="w-1/3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg text-sm flex items-center justify-center gap-2" disabled>
+                                <button type="button" onclick="downloadDocx()" id="download-docx-btn" class="w-1/2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg text-sm flex items-center justify-center gap-2" disabled>
                                     📄 Download DOCX
                                 </button>
                             </div>
+
+
 
                             <div id="form-error" class="hidden bg-status-danger-bg border border-status-danger-border text-status-danger-text text-xs p-3 rounded-xl text-center font-medium"></div>
                         </form>
                     </div>
 
-                    <!-- PREVIEW -->
-                    <div class="glass rounded-2xl p-4 shadow-lg flex justify-center min-h-[600px] bg-gray-200">
-                        <div id="receipt-wrapper" class="w-full flex justify-center">
-                            <div id="receipt-preview">
-                                <div class="text-center text-gray-400 py-16" style="padding-top: 150px;">
-                                    <span class="text-6xl block mb-4 opacity-30">📋</span>
-                                    <p class="font-medium">Isi form di sebelah kiri,</p>
-                                    <p class="font-medium">lalu klik <span class="text-brand-primary font-bold">Generate</span></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
+
+                </div>
+            </div>
+
+            <!-- PREVIEW TERSEMBUNYI untuk html2canvas PNG export -->
+            <div style="position:absolute;left:-9999px;top:-9999px;pointer-events:none;z-index:-1;">
+                <div id="receipt-wrapper">
+                    <div id="receipt-preview" style="background:#fff;color:#000;padding:40px;font-family:Arial,Helvetica,sans-serif;width:800px;font-size:13px;"></div>
                 </div>
             </div>
 
@@ -1819,16 +1814,13 @@
             for (let i = 0; i < 3; i++) addItemRow();
             clearSignature('given');
             clearSignature('received');
-            document.getElementById('receipt-preview').innerHTML =
-                `<div class="text-center text-gray-400 py-16" style="padding-top: 150px;"><span class="text-6xl block mb-4 opacity-30">📋</span><p class="font-medium">Isi form di sebelah kiri,</p><p class="font-medium">lalu klik <span class="text-brand-primary font-bold">Generate</span></p></div>`;
             document.getElementById('form-error').classList.add('hidden');
             document.getElementById('download-btn').disabled = true;
-            document.getElementById('print-btn').disabled = true;
             document.getElementById('download-docx-btn').disabled = true;
         }
 
         // ================================================================
-        // GENERATE RECEIPT (REVISI A4 FORMAL)
+        // GENERATE RECEIPT
         // ================================================================
         function generateReceipt(e) {
             e.preventDefault();
@@ -1838,33 +1830,29 @@
             const receivedBy = document.getElementById('received-by').value.trim();
             const receivedId = document.getElementById('received-id').value.trim() || '-';
             const date = document.getElementById('receipt-date').value;
-
             const errorEl = document.getElementById('form-error');
 
             if (!givenBy || !receivedBy) {
                 errorEl.classList.remove('hidden');
-                errorEl.innerText = '⚠️ "Diberikan Oleh" dan "Diterima Oleh" wajib diisi!';
+                errorEl.innerText = '\u26a0\ufe0f "Diberikan Oleh" dan "Diterima Oleh" wajib diisi!';
                 return;
             }
 
             const sigGiven = getSignatureDataURL('given');
             const sigReceived = getSignatureDataURL('received');
-
             if (!sigGiven) {
                 errorEl.classList.remove('hidden');
-                errorEl.innerText = '⚠️ Tanda tangan "Diserahkan Oleh" wajib diisi!';
+                errorEl.innerText = '\u26a0\ufe0f Tanda tangan "Diserahkan Oleh" wajib diisi!';
                 return;
             }
             if (!sigReceived) {
                 errorEl.classList.remove('hidden');
-                errorEl.innerText = '⚠️ Tanda tangan "Diterima Oleh" wajib diisi!';
+                errorEl.innerText = '\u26a0\ufe0f Tanda tangan "Diterima Oleh" wajib diisi!';
                 return;
             }
-            errorEl.classList.add('hidden');
 
             const rows = document.querySelectorAll('#items-container > .item-row');
             const items = [];
-            let hasError = false;
             rows.forEach(row => {
                 const name = row.querySelector('.item-name').value.trim();
                 const spec = row.querySelector('.item-spec').value.trim() || '-';
@@ -1873,119 +1861,91 @@
                 const sn = row.querySelector('.item-sn').value.trim() || '-';
                 const kondisi = row.querySelector('.item-kondisi').value;
                 const status = row.querySelector('.item-status').value;
-
-                if (name && qty > 0) {
-                    items.push({ name, spec, qty, fa, sn, kondisi, status });
-                } else if (name && qty === 0) {
-                    hasError = true;
-                }
+                if (name && qty > 0) items.push({ name, spec, qty, fa, sn, kondisi, status });
             });
-
             if (items.length === 0) {
                 errorEl.classList.remove('hidden');
-                errorEl.innerText = '⚠️ Tambahkan minimal 1 barang dengan Qty > 0!';
+                errorEl.innerText = '\u26a0\ufe0f Tambahkan minimal 1 barang dengan Qty > 0!';
                 return;
             }
-            if (hasError) {
-                errorEl.classList.remove('hidden');
-                errorEl.innerText = '⚠️ Ada baris dengan Qty 0. Harap perbaiki!';
-                return;
-            }
-            errorEl.classList.add('hidden');
 
             const dateObj = new Date(date + 'T00:00:00');
-            const formattedDate = dateObj.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'id-ID', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            });
+            const formattedDate = dateObj.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-            let itemsHtml = '';
-            items.forEach((item) => {
-                itemsHtml += `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${item.spec}</td>
-                        <td>${item.qty}</td>
-                        <td>${item.fa}</td>
-                        <td>${item.sn}</td>
-                        <td>${item.kondisi}</td>
-                        <td>${item.status}</td>
-                    </tr>
-                `;
-            });
-
-            const receiptHTML = `
-                <div>
-                    <div class="receipt-title">TANDA TERIMA BARANG</div>
-
-                    <div class="receipt-header-info">
-                        <div class="info-row">
-                            <span class="lbl">TELAH TERIMA DARI</span>
-                            <span class="colon">:</span>
-                            <span class="val">${givenBy}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="lbl">DIBERIKAN KEPADA</span>
-                            <span class="colon">:</span>
-                            <span class="val">${receivedBy}</span>
-                        </div>
-                    </div>
-
-                    <table class="main-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 25%;">NAMA BARANG</th>
-                                <th style="width: 25%;">SPESIFIKASI BARANG</th>
-                                <th style="width: 5%;">QTY</th>
-                                <th style="width: 15%;">FA Number</th>
-                                <th style="width: 10%;">S/N</th>
-                                <th style="width: 10%;">Kondisi</th>
-                                <th style="width: 10%;">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHtml}
-                        </tbody>
-                    </table>
-
-                    <table class="sig-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 50%;">Diserahkan Oleh</th>
-                                <th style="width: 50%;">Diterima Oleh</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <img src="${sigGiven}" class="sig-image" alt="Tanda tangan" />
-                                    <div class="sig-details">
-                                        <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span class="s-val">${givenBy}</span></div>
-                                        <div class="sig-row"><span class="s-lbl">Binusian ID</span><span class="s-colon">:</span><span class="s-val">${givenId !== '-' ? givenId : ''}</span></div>
-                                        <div class="sig-row"><span class="s-lbl">Tanggal</span><span class="s-colon">:</span><span class="s-val">${formattedDate}</span></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <img src="${sigReceived}" class="sig-image" alt="Tanda tangan" />
-                                    <div class="sig-details">
-                                        <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span class="s-val">${receivedBy}</span></div>
-                                        <div class="sig-row"><span class="s-lbl">Binusian ID</span><span class="s-colon">:</span><span class="s-val">${receivedId !== '-' ? receivedId : ''}</span></div>
-                                        <div class="sig-row"><span class="s-lbl">Tanggal</span><span class="s-colon">:</span><span class="s-val">${formattedDate}</span></div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
+            errorEl.classList.add('hidden');
+            // Render ke hidden preview untuk PNG export
+            const receiptHTML = buildReceiptHTML(givenBy, givenId, receivedBy, receivedId, formattedDate, items, sigGiven, sigReceived);
             document.getElementById('receipt-preview').innerHTML = receiptHTML;
             document.getElementById('download-btn').disabled = false;
-            document.getElementById('print-btn').disabled = false;
             document.getElementById('download-docx-btn').disabled = false;
-            document.getElementById('gen-btn-text').innerText = '✅ Tanda Terima Siap!';
-            setTimeout(() => document.getElementById('gen-btn-text').innerText = '📄 Generate Tanda Terima', 3000);
+            document.getElementById('gen-btn-text').innerText = '\u2705 Siap Download!';
+            setTimeout(() => document.getElementById('gen-btn-text').innerText = '\ud83d\udcc4 Generate Tanda Terima', 3000);
+        }
+
+
+
+        // ================================================================
+        // ===== FITUR BARU: DOWNLOAD DOCX (DIPERBAIKI) =====
+        // ================================================================
+        // ================================================================
+        // BUILD RECEIPT HTML (untuk PNG export)
+        // ================================================================
+        function buildReceiptHTML(givenBy, givenId, receivedBy, receivedId, formattedDate, items, sigGiven, sigReceived) {
+            let itemsHtml = '';
+            items.forEach(item => {
+                itemsHtml += `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.spec}</td>
+                    <td>${item.qty}</td>
+                    <td>${item.fa}</td>
+                    <td>${item.sn}</td>
+                    <td>${item.kondisi}</td>
+                    <td>${item.status}</td>
+                </tr>`;
+            });
+            return `<div>
+                <div class="receipt-title">TANDA TERIMA BARANG</div>
+                <div class="receipt-header-info">
+                    <div class="info-row"><span class="lbl">TELAH TERIMA DARI</span><span class="colon">:</span><span class="val">${givenBy}</span></div>
+                    <div class="info-row"><span class="lbl">DIBERIKAN KEPADA</span><span class="colon">:</span><span class="val">${receivedBy}</span></div>
+                </div>
+                <table class="main-table">
+                    <thead><tr>
+                        <th style="width:25%;">NAMA BARANG</th>
+                        <th style="width:25%;">SPESIFIKASI BARANG</th>
+                        <th style="width:5%;">QTY</th>
+                        <th style="width:15%;">FA Number</th>
+                        <th style="width:10%;">S/N</th>
+                        <th style="width:10%;">Kondisi</th>
+                        <th style="width:10%;">Status</th>
+                    </tr></thead>
+                    <tbody>${itemsHtml}</tbody>
+                </table>
+                <table class="sig-table">
+                    <thead><tr>
+                        <th style="width:50%;">Diserahkan Oleh</th>
+                        <th style="width:50%;">Diterima Oleh</th>
+                    </tr></thead>
+                    <tbody><tr>
+                        <td>
+                            <img src="${sigGiven}" class="sig-image" alt="TTD" />
+                            <div class="sig-details">
+                                <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span class="s-val">${givenBy}</span></div>
+                                <div class="sig-row"><span class="s-lbl">Binusian ID</span><span class="s-colon">:</span><span class="s-val">${givenId !== '-' ? givenId : ''}</span></div>
+                                <div class="sig-row"><span class="s-lbl">Tanggal</span><span class="s-colon">:</span><span class="s-val">${formattedDate}</span></div>
+                            </div>
+                        </td>
+                        <td>
+                            <img src="${sigReceived}" class="sig-image" alt="TTD" />
+                            <div class="sig-details">
+                                <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span class="s-val">${receivedBy}</span></div>
+                                <div class="sig-row"><span class="s-lbl">Binusian ID</span><span class="s-colon">:</span><span class="s-val">${receivedId !== '-' ? receivedId : ''}</span></div>
+                                <div class="sig-row"><span class="s-lbl">Tanggal</span><span class="s-colon">:</span><span class="s-val">${formattedDate}</span></div>
+                            </div>
+                        </td>
+                    </tr></tbody>
+                </table>
+            </div>`;
         }
 
         // ================================================================
@@ -1993,7 +1953,6 @@
         // ================================================================
         async function downloadReceipt() {
             const btn = document.getElementById('download-btn');
-            const wrapper = document.getElementById('receipt-wrapper');
             const preview = document.getElementById('receipt-preview');
 
             if (!preview.querySelector('table')) {
@@ -2003,7 +1962,6 @@
 
             btn.innerText = '⏳ Generating...';
             btn.disabled = true;
-            wrapper.classList.add('loading');
 
             try {
                 const canvas = await html2canvas(preview, {
@@ -2030,40 +1988,17 @@
 
                 btn.innerText = '⬇ Download PNG';
                 btn.disabled = false;
-                wrapper.classList.remove('loading');
 
             } catch (err) {
                 console.error(err);
-                alert('Gagal generate gambar. Coba gunakan Print (Ctrl+P) sebagai alternatif.');
+                alert('Gagal generate gambar.');
                 btn.innerText = '⬇ Download PNG';
                 btn.disabled = false;
-                wrapper.classList.remove('loading');
             }
         }
 
-        // ================================================================
-        // PRINT
-        // ================================================================
-        function printReceipt() {
-            const preview = document.getElementById('receipt-preview');
-            if (!preview.querySelector('table')) {
-                alert('Generate tanda terima terlebih dahulu!');
-                return;
-            }
-            window.print();
-        }
-
-        // ================================================================
-        // ===== FITUR BARU: DOWNLOAD DOCX (DIPERBAIKI) =====
-        // ================================================================
         async function downloadDocx() {
             const btn = document.getElementById('download-docx-btn');
-            const preview = document.getElementById('receipt-preview');
-
-            if (!preview.querySelector('table')) {
-                alert('Generate tanda terima terlebih dahulu!');
-                return;
-            }
 
             // Cek dulu apakah library docx & FileSaver berhasil dimuat dari CDN.
             // Kalau gagal (koneksi lambat, CDN diblokir, dll), beri pesan yang jelas
@@ -2085,7 +2020,7 @@
             btn.disabled = true;
 
             try {
-                // ---- Ambil data dari form (sama seperti di generateReceipt) ----
+                // ---- Ambil data dari form ----
                 const givenBy = document.getElementById('given-by').value.trim();
                 const givenId = document.getElementById('given-id').value.trim() || '-';
                 const receivedBy = document.getElementById('received-by').value.trim();
@@ -2152,7 +2087,7 @@
 
                 saveAs(blob, `Tanda_Terima_Barang_${new Date().toISOString().slice(0,10)}.docx`);
 
-                btn.innerText = '✅ DOCX Downloaded!';
+                btn.innerText = '✅ Downloaded!';
                 setTimeout(() => {
                     btn.innerText = '📄 Download DOCX';
                     btn.disabled = false;
@@ -2324,19 +2259,43 @@
                     children.push(new Paragraph({ text: ' ', spacing: { before: 800, after: 800 } }));
                 }
 
-                // Detail: Nama, Binusian ID, Tanggal — rata kiri
-                children.push(new Paragraph({
-                    spacing: { before: 80 },
-                    children: [new TextRun({ text: `Nama`, font: 'Arial', size: 20 }),
-                               new TextRun({ text: `\t: ${name || ''}`, font: 'Arial', size: 20 })]
-                }));
-                children.push(new Paragraph({
-                    children: [new TextRun({ text: `Binusian ID`, font: 'Arial', size: 20 }),
-                               new TextRun({ text: `\t: ${idVal && idVal !== '-' ? idVal : ''}`, font: 'Arial', size: 20 })]
-                }));
-                children.push(new Paragraph({
-                    children: [new TextRun({ text: `Tanggal`, font: 'Arial', size: 20 }),
-                               new TextRun({ text: `\t: ${formattedDate}`, font: 'Arial', size: 20 })]
+                // Detail: pakai inner table 3 kolom biar simetris (label | : | nilai)
+                function detailRow(label, value) {
+                    const nb = { style: BorderStyle.NIL, size: 0, color: 'FFFFFF' };
+                    const noBord = { top: nb, bottom: nb, left: nb, right: nb, insideH: nb, insideV: nb };
+                    return new TableRow({
+                        children: [
+                            new TableCell({
+                                width: { size: 1100, type: WidthType.DXA },
+                                borders: noBord,
+                                margins: { top: 0, bottom: 0, left: 0, right: 0 },
+                                children: [new Paragraph({ children: [new TextRun({ text: label, font: 'Arial', size: 20 })] })]
+                            }),
+                            new TableCell({
+                                width: { size: 200, type: WidthType.DXA },
+                                borders: noBord,
+                                margins: { top: 0, bottom: 0, left: 0, right: 0 },
+                                children: [new Paragraph({ children: [new TextRun({ text: ':', font: 'Arial', size: 20 })] })]
+                            }),
+                            new TableCell({
+                                borders: noBord,
+                                margins: { top: 0, bottom: 0, left: 0, right: 0 },
+                                children: [new Paragraph({ children: [new TextRun({ text: value || '', font: 'Arial', size: 20 })] })]
+                            })
+                        ]
+                    });
+                }
+                const nb2 = { style: BorderStyle.NIL, size: 0, color: 'FFFFFF' };
+                const noBord2 = { top: nb2, bottom: nb2, left: nb2, right: nb2, insideH: nb2, insideV: nb2 };
+                children.push(new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: noBord2,
+                    margins: { top: 80, bottom: 0, left: 0, right: 0 },
+                    rows: [
+                        detailRow('Nama', name || ''),
+                        detailRow('Binusian ID', idVal && idVal !== '-' ? idVal : ''),
+                        detailRow('Tanggal', formattedDate)
+                    ]
                 }));
 
                 return new TableCell({
