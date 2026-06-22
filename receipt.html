@@ -1846,9 +1846,13 @@
                 const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun, AlignmentType, WidthType, TableLayoutType, BorderStyle } = docx;
 
                 // Helper untuk membuat sel tabel dengan border
-                const createCell = (text, width = 2000, align = 'center') => {
+                // (FIX: tambah parameter `bold` di sini langsung, bukan diset belakangan
+                // via cell.children[0].children[0].bold = true — itu yang nyebabin crash
+                // karena struktur internal Paragraph/TableCell di library docx gak bisa
+                // diakses/diubah seperti itu setelah objek-nya jadi)
+                const createCell = (text, width = 2000, align = 'center', bold = false) => {
                     const p = new Paragraph({
-                        children: [new TextRun({ text: text, size: 20, font: "Arial" })],
+                        children: [new TextRun({ text: text, size: 20, font: "Arial", bold: bold })],
                         alignment: align === 'center' ? AlignmentType.CENTER : align === 'left' ? AlignmentType.LEFT : AlignmentType.RIGHT,
                         spacing: { before: 100, after: 100 }
                     });
@@ -1868,9 +1872,7 @@
                 const itemRows = [];
                 // Header
                 const headerCells = ['NAMA BARANG', 'SPESIFIKASI', 'QTY', 'FA', 'S/N', 'KONDISI', 'STATUS'].map(text => {
-                    const cell = createCell(text, 1500, 'center');
-                    cell.children[0].children[0].bold = true;
-                    return cell;
+                    return createCell(text, 1500, 'center', true);
                 });
                 itemRows.push(new TableRow({ children: headerCells }));
 
