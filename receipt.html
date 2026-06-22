@@ -951,7 +951,6 @@
 <body>
     <button type="button" id="global-mic-btn" title="Voice input — klik field dulu, baru klik sini">🎤</button>
 
-
     <!-- ============================================================ -->
     <!-- LOGIN PAGE -->
     <!-- ============================================================ -->
@@ -1171,13 +1170,9 @@
                                 </button>
                             </div>
 
-
-
                             <div id="form-error" class="hidden bg-status-danger-bg border border-status-danger-border text-status-danger-text text-xs p-3 rounded-xl text-center font-medium"></div>
                         </form>
                     </div>
-
-
 
                 </div>
             </div>
@@ -1520,298 +1515,183 @@
         const statusOptions = [
             { value: 'Distribusi', label: 'Distribusi' },
             { value: 'Peminjaman', label: 'Peminjaman' },
-            { value: 'Penarikan', label: 'Penarikan' },
             { value: 'Pengembalian', label: 'Pengembalian' },
-            { value: 'Selesai Perbaikan', label: 'Selesai Perbaikan' },
+            { value: 'Perbaikan', label: 'Perbaikan' },
         ];
 
         const kondisiOptions = [
             { value: 'Baik', label: 'Baik' },
-            { value: 'Rusak', label: 'Rusak' },
-            { value: 'Baru', label: 'Baru' },
+            { value: 'Rusak Ringan', label: 'Rusak Ringan' },
+            { value: 'Rusak Berat', label: 'Rusak Berat' },
+            { value: 'Missing Part', label: 'Missing Part' },
         ];
 
         // ================================================================
-        // SIGNATURE PAD
+        // FORM ITEMS - DEFAULT ROWS REDUCED TO 1
         // ================================================================
-        let sigContexts = {};
-        let sigIsDrawing = { given: false, received: false };
-        let sigLastX = { given: 0, received: 0 };
-        let sigLastY = { given: 0, received: 0 };
+        let itemCount = 0;
+
+        function addItemRow(data) {
+            const container = document.getElementById('items-container');
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.dataset.index = itemCount++;
+
+            const name = data?.name || '';
+            const spec = data?.spec || '';
+            const qty = data?.qty || '1';
+            const fa = data?.fa || '';
+            const sn = data?.sn || '';
+            const kondisi = data?.kondisi || 'Baik';
+            const status = data?.status || 'Distribusi';
+
+            row.innerHTML = `
+                <input type="text" class="item-name input-modern text-xs" placeholder="Nama Barang" value="${name}" />
+                <input type="text" class="item-spec input-modern text-xs" placeholder="Spesifikasi" value="${spec}" />
+                <input type="number" class="item-qty input-modern text-xs" placeholder="Qty" value="${qty}" min="1" />
+                <input type="text" class="item-fa input-modern text-xs" placeholder="FA" value="${fa}" />
+                <input type="text" class="item-sn input-modern text-xs" placeholder="S/N" value="${sn}" />
+                <select class="item-kondisi input-modern text-xs">
+                    ${kondisiOptions.map(opt => `<option value="${opt.value}" ${opt.value === kondisi ? 'selected' : ''}>${opt.label}</option>`).join('')}
+                </select>
+                <select class="item-status input-modern text-xs">
+                    ${statusOptions.map(opt => `<option value="${opt.value}" ${opt.value === status ? 'selected' : ''}>${opt.label}</option>`).join('')}
+                </select>
+                <button type="button" class="item-remove remove-item-btn text-red-500 hover:text-red-700 text-lg font-bold" onclick="removeItemRow(this)" title="Hapus item">✕</button>
+            `;
+            container.appendChild(row);
+            return row;
+        }
+
+        function removeItemRow(btn) {
+            const row = btn.closest('.item-row');
+            const container = document.getElementById('items-container');
+            if (container.querySelectorAll('.item-row').length > 1) {
+                row.remove();
+            } else {
+                alert('Minimal 1 item harus ada.');
+            }
+        }
+
+        function initForm() {
+            // Hanya tambahkan 1 baris default (sesuai permintaan user)
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+            addItemRow();
+        }
+
+        // ================================================================
+        // SIGNATURE PADS
+        // ================================================================
+        let sigPads = {};
 
         function initSignaturePads() {
             ['given', 'received'].forEach(id => {
-                const canvas = document.getElementById('sig-' + id);
+                const canvas = document.getElementById(`sig-${id}`);
+                const wrapper = document.getElementById(`sig-${id}-wrapper`);
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
-                sigContexts[id] = ctx;
+                let isDrawing = false;
+                let lastX = 0,
+                    lastY = 0;
 
-                const wrapper = document.getElementById('sig-' + id + '-wrapper');
-                const rect = wrapper.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-                const width = wrapper.clientWidth || 400;
-                const height = Math.max(130, width * 0.33);
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                canvas.style.width = width + 'px';
-                canvas.style.height = height + 'px';
+                function resizeCanvas() {
+                    const rect = wrapper.getBoundingClientRect();
+                    canvas.width = rect.width * 2;
+                    canvas.height = rect.height * 2;
+                    canvas.style.width = rect.width + 'px';
+                    canvas.style.height = rect.height + 'px';
+                    ctx.scale(2, 2);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                }
 
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
 
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 3 * dpr;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
+                function getPos(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    return { x: (clientX - rect.left) * (canvas.width / rect.width / 2), y: (clientY - rect.top) * (canvas
+                            .height / rect.height / 2) };
+                }
 
-                const newCanvas = canvas.cloneNode(true);
-                canvas.parentNode.replaceChild(newCanvas, canvas);
-                document.getElementById('sig-' + id)._cleanup = null;
+                function startDraw(e) {
+                    e.preventDefault();
+                    isDrawing = true;
+                    const pos = getPos(e);
+                    lastX = pos.x;
+                    lastY = pos.y;
+                    wrapper.classList.add('signed');
+                }
 
-                const newCtx = newCanvas.getContext('2d');
-                sigContexts[id] = newCtx;
-                newCtx.clearRect(0, 0, newCanvas.width, newCanvas.height);
-                newCtx.strokeStyle = '#000000';
-                newCtx.lineWidth = 3 * dpr;
-                newCtx.lineCap = 'round';
-                newCtx.lineJoin = 'round';
+                function draw(e) {
+                    e.preventDefault();
+                    if (!isDrawing) return;
+                    const pos = getPos(e);
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(pos.x, pos.y);
+                    ctx.stroke();
+                    lastX = pos.x;
+                    lastY = pos.y;
+                }
 
-                const events = {
-                    mousedown: (e) => startDrawing(e, id, newCtx),
-                    mousemove: (e) => draw(e, id, newCtx),
-                    mouseup: () => stopDrawing(id),
-                    mouseleave: () => stopDrawing(id),
-                    touchstart: (e) => { e.preventDefault();
-                        startDrawing(e.touches[0], id, newCtx); },
-                    touchmove: (e) => { e.preventDefault();
-                        draw(e.touches[0], id, newCtx); },
-                    touchend: (e) => { e.preventDefault();
-                        stopDrawing(id); },
-                    touchcancel: () => stopDrawing(id),
-                };
+                function endDraw(e) {
+                    e.preventDefault();
+                    isDrawing = false;
+                }
 
-                Object.keys(events).forEach(evt => {
-                    newCanvas.addEventListener(evt, events[evt]);
-                });
+                canvas.addEventListener('mousedown', startDraw);
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', endDraw);
+                canvas.addEventListener('mouseleave', endDraw);
+                canvas.addEventListener('touchstart', startDraw, { passive: false });
+                canvas.addEventListener('touchmove', draw, { passive: false });
+                canvas.addEventListener('touchend', endDraw, { passive: false });
 
-                newCanvas.id = 'sig-' + id;
-                document.getElementById('sig-' + id + '-wrapper').querySelector('canvas')?.remove();
-                document.getElementById('sig-' + id + '-wrapper').appendChild(newCanvas);
+                sigPads[id] = { canvas, ctx, wrapper, clear: () => { ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        wrapper.classList.remove('signed'); } };
             });
         }
 
-        function getCanvasCoords(e, id) {
-            const canvas = document.getElementById('sig-' + id);
-            if (!canvas) return { x: 0, y: 0 };
-            const rect = canvas.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            return {
-                x: ((e.clientX || e.pageX) - rect.left) * dpr,
-                y: ((e.clientY || e.pageY) - rect.top) * dpr
-            };
-        }
-
-        function startDrawing(e, id, ctx) {
-            sigIsDrawing[id] = true;
-            if (!ctx) return;
-            const coords = getCanvasCoords(e, id);
-            sigLastX[id] = coords.x;
-            sigLastY[id] = coords.y;
-            ctx.beginPath();
-            ctx.moveTo(coords.x, coords.y);
-            document.getElementById('sig-' + id + '-wrapper').classList.add('signed');
-        }
-
-        function draw(e, id, ctx) {
-            if (!sigIsDrawing[id] || !ctx) return;
-            const coords = getCanvasCoords(e, id);
-            ctx.beginPath();
-            ctx.moveTo(sigLastX[id], sigLastY[id]);
-            ctx.lineTo(coords.x, coords.y);
-            ctx.stroke();
-            sigLastX[id] = coords.x;
-            sigLastY[id] = coords.y;
-        }
-
-        function stopDrawing(id) {
-            sigIsDrawing[id] = false;
-        }
-
         function clearSignature(id) {
-            const canvas = document.getElementById('sig-' + id);
-            if (!canvas) return;
-            const ctx = sigContexts[id];
-            if (!ctx) return;
-            const wrapper = document.getElementById('sig-' + id + '-wrapper');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 3 * (window.devicePixelRatio || 1);
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            wrapper.classList.remove('signed');
+            if (sigPads[id]) sigPads[id].clear();
         }
 
-        function getSignatureDataURL(id) {
-            const canvas = document.getElementById('sig-' + id);
-            if (!canvas) return null;
-            const ctx = sigContexts[id];
-            if (!ctx) return null;
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        function getSignatureData(id) {
+            const pad = sigPads[id];
+            if (!pad) return null;
+            const canvas = pad.canvas;
+            const data = canvas.toDataURL('image/png');
+            // Check if canvas is empty (all white)
+            const imageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
             const pixels = imageData.data;
             let hasDrawing = false;
             for (let i = 0; i < pixels.length; i += 4) {
-                if (pixels[i + 3] > 0) {
+                if (pixels[i] < 255 || pixels[i + 1] < 255 || pixels[i + 2] < 255) {
                     hasDrawing = true;
                     break;
                 }
             }
-            if (!hasDrawing) return null;
-            return canvas.toDataURL('image/png');
+            return hasDrawing ? data : null;
         }
 
         // ================================================================
-        // RECEIPT FORM LOGIC
+        // RESET FORM
         // ================================================================
-        let itemCounter = 0;
-
-        function initForm() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('receipt-date').value = today;
-            document.getElementById('items-container').innerHTML = '';
-            for (let i = 0; i < 3; i++) addItemRow();
-        }
-
-        // ============================================================
-        // VOICE INPUT — Web Speech API (built-in Chrome, gak butuh API key)
-        // Cuma jalan di Chrome (desktop & Android) dan butuh HTTPS.
-        // Alur: klik field yang mau diisi (jadi "target") -> klik tombol
-        // mic tunggal -> ngomong -> hasilnya nempel ke field target itu.
-        // ============================================================
-        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognitionAPI) {
-            document.body.classList.add('no-speech-support');
-        }
-        let activeRecognition = null;
-        let voiceTargetInput = null;
-
-        // Tandain field mana yang lagi jadi target, tiap kali user nge-klik/fokus ke salah satu field
-        // bertanda data-voice-mode (pake event delegation di #main-app, jadi nyakup field statis
-        // kayak Nama Lengkap/Binusian ID DAN row item barang yang dibuat dinamis)
-        document.getElementById('main-app').addEventListener('focusin', (e) => {
-            if (e.target.matches('[data-voice-mode]')) {
-                if (voiceTargetInput) voiceTargetInput.classList.remove('voice-target');
-                voiceTargetInput = e.target;
-                voiceTargetInput.classList.add('voice-target');
-            }
-        });
-
-        const globalMicBtn = document.getElementById('global-mic-btn');
-
-        globalMicBtn.addEventListener('click', () => {
-            if (!SpeechRecognitionAPI) {
-                alert('Browser ini gak support voice input. Pake Chrome ya bro.');
-                return;
-            }
-
-            // Kalau lagi nge-record, tap lagi buat stop manual
-            if (activeRecognition) {
-                activeRecognition.stop();
-                return;
-            }
-
-            if (!voiceTargetInput || !document.body.contains(voiceTargetInput)) {
-                alert('Klik dulu kolom yang mau diisi (Nama Lengkap/Binusian ID/Nama Barang/Spesifikasi/FA/S-N), baru tap mic ini.');
-                return;
-            }
-
-            const recognition = new SpeechRecognitionAPI();
-            recognition.lang = 'id-ID';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            activeRecognition = recognition;
-            globalMicBtn.classList.add('mic-active');
-            globalMicBtn.textContent = '⏺';
-
-            recognition.onresult = (event) => {
-                let transcript = event.results[0][0].transcript.trim();
-
-                // Field "compact" (FA, S/N, Binusian ID) itu satu string angka/huruf
-                // utuh tanpa spasi — jeda napas pas ngomong gak boleh ke-translate
-                // jadi spasi pemisah. Field "spaced" (Nama Barang, Spesifikasi,
-                // Nama Lengkap) tetep pake spasi normal antar kata.
-                const isCompactField = voiceTargetInput.dataset.voiceMode === 'compact';
-                if (isCompactField) {
-                    transcript = transcript.replace(/\s+/g, '');
-                }
-
-                voiceTargetInput.value = transcript.toUpperCase();
-                voiceTargetInput.dispatchEvent(new Event('input', { bubbles: true }));
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Voice input error:', event.error);
-                if (event.error === 'not-allowed') {
-                    alert('Akses mic ditolak. Cek permission mic browser lo (klik ikon gembok di address bar).');
-                } else if (event.error === 'no-speech') {
-                    // diem aja, biasa kepencet tapi gak ngomong apa-apa
-                }
-            };
-
-            recognition.onend = () => {
-                globalMicBtn.classList.remove('mic-active');
-                globalMicBtn.textContent = '🎤';
-                activeRecognition = null;
-            };
-
-            recognition.start();
-        });
-
-        function addItemRow(data = null) {
-            const container = document.getElementById('items-container');
-            const rowId = 'item-' + Date.now() + '-' + (itemCounter++);
-            const div = document.createElement('div');
-            div.id = rowId;
-            div.className = 'item-row';
-
-            const statusOpts = statusOptions.map(s =>
-                `<option value="${s.value}" ${data && data.status === s.value ? 'selected' : ''}>${s.label}</option>`
-            ).join('');
-
-            const kondisiOpts = kondisiOptions.map(k =>
-                `<option value="${k.value}" ${data && data.kondisi === k.value ? 'selected' : ''}>${k.label}</option>`
-            ).join('');
-
-            div.innerHTML = `
-                <input type="text" class="item-name input-modern text-brand-text text-xs" data-voice-mode="spaced" placeholder="Nama Barang" value="${data?.name || ''}" />
-                <input type="text" class="item-spec input-modern text-brand-text text-xs" data-voice-mode="spaced" placeholder="Spesifikasi" value="${data?.spec || ''}" />
-                <input type="number" class="item-qty input-modern text-brand-text text-xs text-center" placeholder="Qty" value="${data?.qty || 1}" min="1" />
-                <input type="text" class="item-fa input-modern text-brand-text text-xs" data-voice-mode="compact" placeholder="FA" value="${data?.fa || ''}" />
-                <input type="text" class="item-sn input-modern text-brand-text text-xs" data-voice-mode="compact" placeholder="S/N" value="${data?.sn || ''}" />
-                <select class="item-kondisi input-modern text-brand-text text-xs">${kondisiOpts}</select>
-                <select class="item-status input-modern text-brand-text text-xs">${statusOpts}</select>
-                <button type="button" onclick="removeItemRow('${rowId}')" class="item-remove p-1.5 text-brand-muted hover:text-status-danger-text rounded-lg bg-brand-surface border border-brand-border hover:border-status-danger-text transition text-xs">✕</button>
-            `;
-            container.appendChild(div);
-        }
-
-        function removeItemRow(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.style.opacity = '0';
-                el.style.transform = 'scale(0.9)';
-                setTimeout(() => el.remove(), 200);
-            }
-        }
-
         function resetForm() {
+            if (!confirm('Reset semua data?')) return;
             document.getElementById('given-by').value = '';
             document.getElementById('given-id').value = '';
             document.getElementById('received-by').value = '';
             document.getElementById('received-id').value = '';
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('receipt-date').value = today;
+            document.getElementById('receipt-date').value = '';
             document.getElementById('items-container').innerHTML = '';
-            for (let i = 0; i < 3; i++) addItemRow();
+            addItemRow();
             clearSignature('given');
             clearSignature('received');
             document.getElementById('form-error').classList.add('hidden');
@@ -1826,577 +1706,499 @@
             e.preventDefault();
 
             const givenBy = document.getElementById('given-by').value.trim();
-            const givenId = document.getElementById('given-id').value.trim() || '-';
+            const givenId = document.getElementById('given-id').value.trim();
             const receivedBy = document.getElementById('received-by').value.trim();
-            const receivedId = document.getElementById('received-id').value.trim() || '-';
+            const receivedId = document.getElementById('received-id').value.trim();
             const date = document.getElementById('receipt-date').value;
-            const errorEl = document.getElementById('form-error');
 
-            if (!givenBy || !receivedBy) {
-                errorEl.classList.remove('hidden');
-                errorEl.innerText = '\u26a0\ufe0f "Diberikan Oleh" dan "Diterima Oleh" wajib diisi!';
+            if (!givenBy || !receivedBy || !date) {
+                document.getElementById('form-error').classList.remove('hidden');
+                document.getElementById('form-error').innerText = 'Lengkapi identitas dan tanggal!';
                 return;
             }
 
-            const sigGiven = getSignatureDataURL('given');
-            const sigReceived = getSignatureDataURL('received');
-            if (!sigGiven) {
-                errorEl.classList.remove('hidden');
-                errorEl.innerText = '\u26a0\ufe0f Tanda tangan "Diserahkan Oleh" wajib diisi!';
-                return;
-            }
-            if (!sigReceived) {
-                errorEl.classList.remove('hidden');
-                errorEl.innerText = '\u26a0\ufe0f Tanda tangan "Diterima Oleh" wajib diisi!';
-                return;
-            }
-
-            const rows = document.querySelectorAll('#items-container > .item-row');
+            const rows = document.querySelectorAll('#items-container .item-row');
             const items = [];
+            let valid = true;
             rows.forEach(row => {
                 const name = row.querySelector('.item-name').value.trim();
-                const spec = row.querySelector('.item-spec').value.trim() || '-';
-                const qty = parseInt(row.querySelector('.item-qty').value) || 0;
-                const fa = row.querySelector('.item-fa').value.trim() || '-';
-                const sn = row.querySelector('.item-sn').value.trim() || '-';
+                const spec = row.querySelector('.item-spec').value.trim();
+                const qty = row.querySelector('.item-qty').value.trim() || '1';
+                const fa = row.querySelector('.item-fa').value.trim();
+                const sn = row.querySelector('.item-sn').value.trim();
                 const kondisi = row.querySelector('.item-kondisi').value;
                 const status = row.querySelector('.item-status').value;
-                if (name && qty > 0) items.push({ name, spec, qty, fa, sn, kondisi, status });
+                if (!name) {
+                    valid = false;
+                    row.querySelector('.item-name').focus();
+                    row.querySelector('.item-name').style.borderColor = 'red';
+                    setTimeout(() => row.querySelector('.item-name').style.borderColor = '', 2000);
+                }
+                items.push({ name, spec, qty, fa, sn, kondisi, status });
             });
-            if (items.length === 0) {
-                errorEl.classList.remove('hidden');
-                errorEl.innerText = '\u26a0\ufe0f Tambahkan minimal 1 barang dengan Qty > 0!';
+
+            if (!valid) {
+                document.getElementById('form-error').classList.remove('hidden');
+                document.getElementById('form-error').innerText = 'Nama barang tidak boleh kosong!';
                 return;
             }
 
-            const dateObj = new Date(date + 'T00:00:00');
-            const formattedDate = dateObj.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+            document.getElementById('form-error').classList.add('hidden');
 
-            errorEl.classList.add('hidden');
-            // Render ke hidden preview untuk PNG export
-            const receiptHTML = buildReceiptHTML(givenBy, givenId, receivedBy, receivedId, formattedDate, items, sigGiven, sigReceived);
-            document.getElementById('receipt-preview').innerHTML = receiptHTML;
-            document.getElementById('download-btn').disabled = false;
-            document.getElementById('download-docx-btn').disabled = false;
-            document.getElementById('gen-btn-text').innerText = '\u2705 Siap Download!';
-            setTimeout(() => document.getElementById('gen-btn-text').innerText = '\ud83d\udcc4 Generate Tanda Terima', 3000);
-        }
+            // Generate preview
+            const preview = document.getElementById('receipt-preview');
+            const dateFormatted = new Date(date + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'long',
+                year: 'numeric' });
 
-
-
-        // ================================================================
-        // ===== FITUR BARU: DOWNLOAD DOCX (DIPERBAIKI) =====
-        // ================================================================
-        // ================================================================
-        // BUILD RECEIPT HTML (untuk PNG export)
-        // ================================================================
-        function buildReceiptHTML(givenBy, givenId, receivedBy, receivedId, formattedDate, items, sigGiven, sigReceived) {
-            let itemsHtml = '';
-            items.forEach(item => {
-                itemsHtml += `<tr>
+            let tableRows = items.map((item, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
                     <td>${item.name}</td>
-                    <td>${item.spec}</td>
+                    <td>${item.spec || '-'}</td>
                     <td>${item.qty}</td>
-                    <td>${item.fa}</td>
-                    <td>${item.sn}</td>
+                    <td>${item.fa || '-'}</td>
+                    <td>${item.sn || '-'}</td>
                     <td>${item.kondisi}</td>
                     <td>${item.status}</td>
-                </tr>`;
-            });
-            return `<div>
+                </tr>
+            `).join('');
+
+            preview.innerHTML = `
                 <div class="receipt-title">TANDA TERIMA BARANG</div>
+
                 <div class="receipt-header-info">
-                    <div class="info-row"><span class="lbl">TELAH TERIMA DARI</span><span class="colon">:</span><span class="val">${givenBy}</span></div>
-                    <div class="info-row"><span class="lbl">DIBERIKAN KEPADA</span><span class="colon">:</span><span class="val">${receivedBy}</span></div>
+                    <div class="info-row"><span class="lbl">Diberikan Oleh</span><span class="colon">:</span><span class="val">${givenBy}</span></div>
+                    <div class="info-row"><span class="lbl">Binusian ID</span><span class="colon">:</span><span class="val">${givenId || '-'}</span></div>
+                    <div class="info-row"><span class="lbl">Diterima Oleh</span><span class="colon">:</span><span class="val">${receivedBy}</span></div>
+                    <div class="info-row"><span class="lbl">Binusian ID</span><span class="colon">:</span><span class="val">${receivedId || '-'}</span></div>
+                    <div class="info-row"><span class="lbl">Tanggal</span><span class="colon">:</span><span class="val">${dateFormatted}</span></div>
                 </div>
+
                 <table class="main-table">
-                    <thead><tr>
-                        <th style="width:25%;">NAMA BARANG</th>
-                        <th style="width:25%;">SPESIFIKASI BARANG</th>
-                        <th style="width:5%;">QTY</th>
-                        <th style="width:15%;">FA Number</th>
-                        <th style="width:10%;">S/N</th>
-                        <th style="width:10%;">Kondisi</th>
-                        <th style="width:10%;">Status</th>
-                    </tr></thead>
-                    <tbody>${itemsHtml}</tbody>
+                    <thead>
+                        <tr>
+                            <th style="width:30px;">No</th>
+                            <th style="text-align:left;">Nama Barang</th>
+                            <th style="text-align:left;">Spesifikasi</th>
+                            <th style="width:50px;">Qty</th>
+                            <th>FA</th>
+                            <th>S/N</th>
+                            <th>Kondisi</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
                 </table>
+
                 <table class="sig-table">
-                    <thead><tr>
+                    <tr>
                         <th style="width:50%;">Diserahkan Oleh</th>
                         <th style="width:50%;">Diterima Oleh</th>
-                    </tr></thead>
-                    <tbody><tr>
+                    </tr>
+                    <tr>
                         <td>
-                            <img src="${sigGiven}" class="sig-image" alt="TTD" />
-                            <div class="sig-details">
-                                <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span class="s-val">${givenBy}</span></div>
-                                <div class="sig-row"><span class="s-lbl">Binusian ID</span><span class="s-colon">:</span><span class="s-val">${givenId !== '-' ? givenId : ''}</span></div>
-                                <div class="sig-row"><span class="s-lbl">Tanggal</span><span class="s-colon">:</span><span class="s-val">${formattedDate}</span></div>
+                            <div style="display:flex;flex-direction:column;align-items:center;height:100%;">
+                                <img class="sig-image" id="sig-given-img" style="max-height:130px;width:auto;max-width:90%;object-fit:contain;" />
+                                <div class="sig-details">
+                                    <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span>${givenBy}</span></div>
+                                    <div class="sig-row"><span class="s-lbl">Tgl</span><span class="s-colon">:</span><span>${dateFormatted}</span></div>
+                                </div>
                             </div>
                         </td>
                         <td>
-                            <img src="${sigReceived}" class="sig-image" alt="TTD" />
-                            <div class="sig-details">
-                                <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span class="s-val">${receivedBy}</span></div>
-                                <div class="sig-row"><span class="s-lbl">Binusian ID</span><span class="s-colon">:</span><span class="s-val">${receivedId !== '-' ? receivedId : ''}</span></div>
-                                <div class="sig-row"><span class="s-lbl">Tanggal</span><span class="s-colon">:</span><span class="s-val">${formattedDate}</span></div>
+                            <div style="display:flex;flex-direction:column;align-items:center;height:100%;">
+                                <img class="sig-image" id="sig-received-img" style="max-height:130px;width:auto;max-width:90%;object-fit:contain;" />
+                                <div class="sig-details">
+                                    <div class="sig-row"><span class="s-lbl">Nama</span><span class="s-colon">:</span><span>${receivedBy}</span></div>
+                                    <div class="sig-row"><span class="s-lbl">Tgl</span><span class="s-colon">:</span><span>${dateFormatted}</span></div>
+                                </div>
                             </div>
                         </td>
-                    </tr></tbody>
+                    </tr>
                 </table>
-            </div>`;
+            `;
+
+            // Embed signature images
+            const givenSig = getSignatureData('given');
+            const receivedSig = getSignatureData('received');
+            const givenImg = preview.querySelector('#sig-given-img');
+            const receivedImg = preview.querySelector('#sig-received-img');
+            if (givenImg) givenImg.src = givenSig || '';
+            if (receivedImg) receivedImg.src = receivedSig || '';
+
+            document.getElementById('download-btn').disabled = false;
+            document.getElementById('download-docx-btn').disabled = false;
+            document.getElementById('gen-btn-text').innerText = '✅ Berhasil! Download di bawah.';
+
+            // Scroll ke tombol download
+            document.getElementById('download-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         // ================================================================
         // DOWNLOAD PNG
         // ================================================================
         async function downloadReceipt() {
-            const btn = document.getElementById('download-btn');
-            const preview = document.getElementById('receipt-preview');
-
-            if (!preview.querySelector('table')) {
-                alert('Generate tanda terima terlebih dahulu!');
-                return;
-            }
-
-            btn.innerText = '⏳ Generating...';
-            btn.disabled = true;
-
+            const wrapper = document.getElementById('receipt-wrapper');
+            wrapper.classList.add('loading');
             try {
-                const canvas = await html2canvas(preview, {
+                const canvas = await html2canvas(document.getElementById('receipt-preview'), {
                     scale: 2,
-                    backgroundColor: '#FFFFFF',
-                    allowTaint: true,
                     useCORS: true,
                     logging: false,
-                    onclone: (clonedDoc) => {
-                        clonedDoc.querySelectorAll('.sig-image').forEach(img => {
-                            img.style.maxHeight = '130px';
-                            img.style.maxWidth = '90%';
-                            img.style.objectFit = 'contain';
-                            img.style.background = 'transparent';
-                            img.style.width = 'auto';
-                        });
-                    }
+                    backgroundColor: '#ffffff',
+                    allowTaint: true,
                 });
-
                 const link = document.createElement('a');
-                link.download = `Tanda_Terima_Barang_${new Date().toISOString().slice(0,10)}.png`;
+                link.download = `TandaTerima_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-
-                btn.innerText = '⬇ Download PNG';
-                btn.disabled = false;
-
             } catch (err) {
                 console.error(err);
-                alert('Gagal generate gambar.');
-                btn.innerText = '⬇ Download PNG';
-                btn.disabled = false;
+                alert('Gagal generate PNG: ' + err.message);
+            } finally {
+                wrapper.classList.remove('loading');
             }
         }
 
+        // ================================================================
+        // DOWNLOAD DOCX
+        // ================================================================
         async function downloadDocx() {
-            const btn = document.getElementById('download-docx-btn');
-
-            // Cek dulu apakah library docx & FileSaver berhasil dimuat dari CDN.
-            // Kalau gagal (koneksi lambat, CDN diblokir, dll), beri pesan yang jelas
-            // daripada error teknis "docx is not defined".
-            if (typeof docx === 'undefined') {
-                alert(
-                    'Library DOCX gagal dimuat dari CDN. Coba refresh halaman ini (pastikan koneksi internet stabil), lalu coba lagi.'
-                    );
-                return;
-            }
-            if (typeof saveAs === 'undefined') {
-                alert(
-                    'Library FileSaver gagal dimuat dari CDN. Coba refresh halaman ini (pastikan koneksi internet stabil), lalu coba lagi.'
-                    );
-                return;
-            }
-
-            btn.innerText = '⏳ Generating...';
-            btn.disabled = true;
-
+            const wrapper = document.getElementById('receipt-wrapper');
+            wrapper.classList.add('loading');
             try {
-                // ---- Ambil data dari form ----
+                const preview = document.getElementById('receipt-preview');
                 const givenBy = document.getElementById('given-by').value.trim();
-                const givenId = document.getElementById('given-id').value.trim() || '-';
                 const receivedBy = document.getElementById('received-by').value.trim();
-                const receivedId = document.getElementById('received-id').value.trim() || '-';
                 const date = document.getElementById('receipt-date').value;
-                const dateObj = new Date(date + 'T00:00:00');
-                const formattedDate = dateObj.toLocaleDateString(currentLang === 'en' ? 'en-GB' : 'id-ID', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric'
-                });
+                const dateFormatted = new Date(date + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'long',
+                    year: 'numeric' });
 
-                // ---- Ambil data items dari DOM ----
-                const rows = document.querySelectorAll('#items-container > .item-row');
+                const rows = document.querySelectorAll('#items-container .item-row');
                 const items = [];
                 rows.forEach(row => {
                     const name = row.querySelector('.item-name').value.trim();
-                    const spec = row.querySelector('.item-spec').value.trim() || '-';
-                    const qty = parseInt(row.querySelector('.item-qty').value) || 0;
-                    const fa = row.querySelector('.item-fa').value.trim() || '-';
-                    const sn = row.querySelector('.item-sn').value.trim() || '-';
+                    const spec = row.querySelector('.item-spec').value.trim();
+                    const qty = row.querySelector('.item-qty').value.trim() || '1';
+                    const fa = row.querySelector('.item-fa').value.trim();
+                    const sn = row.querySelector('.item-sn').value.trim();
                     const kondisi = row.querySelector('.item-kondisi').value;
                     const status = row.querySelector('.item-status').value;
-                    if (name && qty > 0) {
-                        items.push({ name, spec, qty, fa, sn, kondisi, status });
-                    }
+                    items.push({ name, spec, qty, fa, sn, kondisi, status });
                 });
 
-                if (items.length === 0) {
-                    alert('Tidak ada data item!');
-                    btn.innerText = '📄 Download DOCX';
-                    btn.disabled = false;
-                    return;
-                }
+                const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, BorderStyle, AlignmentType,
+                    HeadingLevel, ImageRun } = docx;
 
-                // ---- Ambil signature images (boleh kosong, nanti di-fallback) ----
-                const sigGivenDataUrl = getSignatureDataURL('given');
-                const sigReceivedDataUrl = getSignatureDataURL('received');
-                if (!sigGivenDataUrl) {
-                    alert('Tanda tangan "Diserahkan Oleh" wajib diisi!');
-                    btn.innerText = '📄 Download DOCX';
-                    btn.disabled = false;
-                    return;
-                }
-                if (!sigReceivedDataUrl) {
-                    alert('Tanda tangan "Diterima Oleh" wajib diisi!');
-                    btn.innerText = '📄 Download DOCX';
-                    btn.disabled = false;
-                    return;
-                }
-                const sigGivenBase64 = sigGivenDataUrl.split(',')[1] || null;
-                const sigReceivedBase64 = sigReceivedDataUrl.split(',')[1] || null;
-
-                const blob = await buildReceiptDocxBlob({
-                    givenBy,
-                    givenId,
-                    receivedBy,
-                    receivedId,
-                    formattedDate,
-                    items,
-                    sigGivenBase64,
-                    sigReceivedBase64
-                });
-
-                saveAs(blob, `Tanda_Terima_Barang_${new Date().toISOString().slice(0,10)}.docx`);
-
-                btn.innerText = '✅ Downloaded!';
-                setTimeout(() => {
-                    btn.innerText = '📄 Download DOCX';
-                    btn.disabled = false;
-                }, 3000);
-
-            } catch (err) {
-                // Tampilin pesan error asli di alert biar gampang ketauan masalahnya
-                // kalau suatu saat error lagi (gak cuma "coba lagi" doang).
-                console.error('Gagal generate DOCX:', err);
-                alert('Terjadi kesalahan saat generate DOCX:\n\n' + (err && err.message ? err.message : err) +
-                    '\n\n(Cek Console browser untuk detail lengkap)');
-                btn.innerText = '📄 Download DOCX';
-                btn.disabled = false;
-            }
-        }
-
-        // ================================================================
-        // BUILDER DOCX — dipisah dari downloadDocx() biar lebih mudah
-        // di-maintain & di-debug. Semua styling (bold, dst) di-set LANGSUNG
-        // di constructor TextRun/Paragraph, TIDAK PERNAH dimodif belakangan
-        // (itu sumber bug versi sebelumnya: cell.children[0].children[0].bold = ...
-        // yang crash karena struktur internal docx.js gak bisa diakses begitu).
-        // ================================================================
-        async function buildReceiptDocxBlob({ givenBy, givenId, receivedBy, receivedId, formattedDate, items, sigGivenBase64,
-            sigReceivedBase64 }) {
-            const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun, AlignmentType, WidthType,
-                BorderStyle, VerticalAlign } = docx;
-
-            const cellBorders = {
-                top: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
-                bottom: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
-                left: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
-                right: { style: BorderStyle.SINGLE, size: 1, color: '000000' }
-            };
-
-            // Helper bikin 1 sel tabel teks. width dalam DXA (opsional).
-            function cellText(text, opts = {}) {
-                const { width, bold = false, align = 'center', noBorder = false } = opts;
-                const alignMap = { center: AlignmentType.CENTER, left: AlignmentType.LEFT, right: AlignmentType.RIGHT };
-                const noBorderStyle = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
-                const useBorders = noBorder ? {
-                    top: noBorderStyle, bottom: noBorderStyle, left: noBorderStyle, right: noBorderStyle
-                } : cellBorders;
-                const cellOpts = {
-                    children: [
-                        new Paragraph({
-                            alignment: alignMap[align] || AlignmentType.CENTER,
-                            children: [new TextRun({ text: String(text ?? ''), font: 'Arial', size: 22, bold: bold })]
-                        })
-                    ],
-                    verticalAlign: VerticalAlign.CENTER,
-                    margins: { top: 60, bottom: 60, left: 80, right: 80 },
-                    borders: useBorders
-                };
-                if (width) cellOpts.width = { size: width, type: WidthType.DXA };
-                return new TableCell(cellOpts);
-            }
-
-            // ---- Tabel header info (3 kolom: label | : | nilai) — mirip gambar ----
-            const noBorderStyle = { style: BorderStyle.NIL, size: 0, color: 'FFFFFF' };
-            const noBorders = { top: noBorderStyle, bottom: noBorderStyle, left: noBorderStyle, right: noBorderStyle, insideH: noBorderStyle, insideV: noBorderStyle };
-            function infoRow(label, value) {
-                return new TableRow({
-                    children: [
-                        new TableCell({
-                            width: { size: 2400, type: WidthType.DXA },
-                            borders: noBorders,
-                            margins: { top: 40, bottom: 40, left: 0, right: 0 },
-                            children: [new Paragraph({ children: [new TextRun({ text: label, font: 'Arial', size: 22 })] })]
-                        }),
-                        new TableCell({
-                            width: { size: 300, type: WidthType.DXA },
-                            borders: noBorders,
-                            margins: { top: 40, bottom: 40, left: 0, right: 0 },
-                            children: [new Paragraph({ children: [new TextRun({ text: ':', font: 'Arial', size: 22 })] })]
-                        }),
-                        new TableCell({
-                            borders: noBorders,
-                            margins: { top: 40, bottom: 40, left: 0, right: 0 },
-                            children: [new Paragraph({ children: [new TextRun({ text: value || '', font: 'Arial', size: 22 })] })]
-                        })
-                    ]
-                });
-            }
-
-            const infoTable = new Table({
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                borders: { top: noBorderStyle, bottom: noBorderStyle, left: noBorderStyle, right: noBorderStyle, insideH: noBorderStyle, insideV: noBorderStyle },
-                rows: [
-                    infoRow('TELAH TERIMA DARI', givenBy),
-                    infoRow('DIBERIKAN KEPADA', receivedBy)
-                ]
-            });
-
-            // ---- Tabel daftar barang (header lengkap sesuai gambar) ----
-            const headerLabels = ['NAMA BARANG', 'SPESIFIKASI BARANG', 'QTY', 'FA Number', 'S/N', 'Kondisi', 'Status'];
-            const headerWidths = [2000, 2000, 700, 1400, 1000, 1000, 1000];
-            const headerRow = new TableRow({
-                children: headerLabels.map((label, i) => cellText(label, { width: headerWidths[i], bold: false, align: 'center' }))
-            });
-
-            const itemDataRows = items.map(item => new TableRow({
-                children: [
-                    cellText(item.name, { width: headerWidths[0], align: 'left' }),
-                    cellText(item.spec, { width: headerWidths[1], align: 'left' }),
-                    cellText(item.qty, { width: headerWidths[2] }),
-                    cellText(item.fa, { width: headerWidths[3] }),
-                    cellText(item.sn, { width: headerWidths[4] }),
-                    cellText(item.kondisi, { width: headerWidths[5] }),
-                    cellText(item.status, { width: headerWidths[6] })
-                ]
-            }));
-
-            const itemTable = new Table({
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                rows: [headerRow, ...itemDataRows]
-            });
-
-            // ---- Konversi base64 -> Uint8Array, AMAN walau base64 rusak ----
-            function base64ToUint8Array(base64) {
-                const raw = atob(base64);
-                const array = new Uint8Array(raw.length);
-                for (let i = 0; i < raw.length; i++) array[i] = raw.charCodeAt(i);
-                return array;
-            }
-
-            // Signature table: 2 baris per cell — row 1 label (header), row 2 isi (ttd + nama/ID/tgl)
-            // Sesuai gambar: label header di baris tersendiri (tengah), area TTD besar, lalu detail bawah
-            function buildSignatureLabelCell(label) {
-                return new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    borders: cellBorders,
-                    margins: { top: 80, bottom: 80, left: 120, right: 120 },
-                    children: [
-                        new Paragraph({
-                            alignment: AlignmentType.CENTER,
-                            children: [new TextRun({ text: label, font: 'Arial', size: 22 })]
-                        })
-                    ]
-                });
-            }
-
-            function buildSignatureBodyCell(name, idVal, base64Data) {
-                const children = [];
-
-                // Area TTD — gambar atau ruang kosong besar
-                let imageAdded = false;
-                if (base64Data) {
-                    try {
-                        const bytes = base64ToUint8Array(base64Data);
-                        children.push(new Paragraph({
-                            alignment: AlignmentType.CENTER,
-                            spacing: { before: 200, after: 200 },
-                            children: [
-                                new ImageRun({
-                                    type: 'png',
-                                    data: bytes,
-                                    transformation: { width: 200, height: 80 }
-                                })
-                            ]
-                        }));
-                        imageAdded = true;
-                    } catch (imgErr) {
-                        console.warn('Gagal embed gambar tanda tangan:', imgErr);
-                    }
-                }
-                if (!imageAdded) {
-                    // Ruang kosong untuk TTD manual
-                    children.push(new Paragraph({ text: ' ', spacing: { before: 800, after: 800 } }));
-                }
-
-                // Detail: pakai inner table 3 kolom biar simetris (label | : | nilai)
-                function detailRow(label, value) {
-                    const nb = { style: BorderStyle.NIL, size: 0, color: 'FFFFFF' };
-                    const noBord = { top: nb, bottom: nb, left: nb, right: nb, insideH: nb, insideV: nb };
+                // Build table rows
+                const tableRows = items.map((item, idx) => {
                     return new TableRow({
                         children: [
-                            new TableCell({
-                                width: { size: 1100, type: WidthType.DXA },
-                                borders: noBord,
-                                margins: { top: 0, bottom: 0, left: 0, right: 0 },
-                                children: [new Paragraph({ children: [new TextRun({ text: label, font: 'Arial', size: 20 })] })]
-                            }),
-                            new TableCell({
-                                width: { size: 200, type: WidthType.DXA },
-                                borders: noBord,
-                                margins: { top: 0, bottom: 0, left: 0, right: 0 },
-                                children: [new Paragraph({ children: [new TextRun({ text: ':', font: 'Arial', size: 20 })] })]
-                            }),
-                            new TableCell({
-                                borders: noBord,
-                                margins: { top: 0, bottom: 0, left: 0, right: 0 },
-                                children: [new Paragraph({ children: [new TextRun({ text: value || '', font: 'Arial', size: 20 })] })]
-                            })
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun((idx + 1)
+                                    .toString())], alignment: AlignmentType.CENTER })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun(item
+                                    .name)] })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun(item.spec ||
+                                        '-')] })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun(item.qty)],
+                                    alignment: AlignmentType.CENTER })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun(item.fa ||
+                                        '-')] })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun(item.sn ||
+                                        '-')] })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun(item
+                                        .kondisi)] })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun(item
+                                    .status)] })] }),
                         ]
                     });
-                }
-                const nb2 = { style: BorderStyle.NIL, size: 0, color: 'FFFFFF' };
-                const noBord2 = { top: nb2, bottom: nb2, left: nb2, right: nb2, insideH: nb2, insideV: nb2 };
-                children.push(new Table({
-                    width: { size: 100, type: WidthType.PERCENTAGE },
-                    borders: noBord2,
-                    margins: { top: 80, bottom: 0, left: 0, right: 0 },
-                    rows: [
-                        detailRow('Nama', name || ''),
-                        detailRow('Binusian ID', idVal && idVal !== '-' ? idVal : ''),
-                        detailRow('Tanggal', formattedDate)
-                    ]
-                }));
-
-                return new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    borders: cellBorders,
-                    margins: { top: 80, bottom: 120, left: 120, right: 120 },
-                    children
                 });
-            }
 
-            // Tabel TTD: baris 1 = label header, baris 2 = isi
-            const sigTable = new Table({
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                rows: [
-                    new TableRow({
-                        children: [
-                            buildSignatureLabelCell('Diserahkan Oleh'),
-                            buildSignatureLabelCell('Diterima Oleh')
-                        ]
-                    }),
-                    new TableRow({
-                        children: [
-                            buildSignatureBodyCell(givenBy, givenId, sigGivenBase64),
-                            buildSignatureBodyCell(receivedBy, receivedId, sigReceivedBase64)
-                        ]
-                    })
-                ]
-            });
-
-            const doc = new Document({
-                sections: [{
-                    properties: { page: { margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 } } },
+                const headerRow = new TableRow({
                     children: [
-                        // Judul
-                        new Paragraph({
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 360 },
-                            children: [new TextRun({ text: 'TANDA TERIMA BARANG', font: 'Arial', size: 28,
-                                    bold: true, underline: {} })]
-                        }),
-                        // Info header pakai tabel (label | : | nilai)
-                        infoTable,
-                        new Paragraph({ spacing: { after: 240 }, children: [] }),
-                        // Tabel barang (langsung, tanpa heading "Daftar Barang")
-                        itemTable,
-                        new Paragraph({ spacing: { after: 360 }, children: [] }),
-                        // Tabel TTD
-                        sigTable
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('No')],
+                                alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('Nama Barang')] })] }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('Spesifikasi')] })] }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('Qty')],
+                                alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('FA')] })] }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('S/N')] })] }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('Kondisi')] })] }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun('Status')] })] }),
                     ]
-                }]
-            });
+                });
 
-            return await Packer.toBlob(doc);
+                const table = new Table({
+                    rows: [headerRow, ...tableRows],
+                    width: { size: 100, type: docx.WidthType.PERCENTAGE },
+                    borders: {
+                        top: { style: BorderStyle.SINGLE, size: 1 },
+                        bottom: { style: BorderStyle.SINGLE, size: 1 },
+                        left: { style: BorderStyle.SINGLE, size: 1 },
+                        right: { style: BorderStyle.SINGLE, size: 1 },
+                        insideHorizontal: { style: BorderStyle.SINGLE, size: 1 },
+                        insideVertical: { style: BorderStyle.SINGLE, size: 1 },
+                    },
+                });
+
+                // Signature images
+                const givenSig = getSignatureData('given');
+                const receivedSig = getSignatureData('received');
+
+                const doc = new Document({
+                    sections: [{
+                        properties: {
+                            page: {
+                                margin: { top: 720, bottom: 720, left: 720, right: 720 },
+                            },
+                        },
+                        children: [
+                            new Paragraph({
+                                children: [new TextRun({ text: 'TANDA TERIMA BARANG', size: 28, bold: true,
+                                    underline: { type: docx.UnderlineType.SINGLE } })],
+                                alignment: AlignmentType.CENTER,
+                                spacing: { after: 400 },
+                            }),
+                            new Paragraph({
+                                children: [new TextRun(`Diberikan Oleh : ${givenBy}`)],
+                                spacing: { after: 100 },
+                            }),
+                            new Paragraph({
+                                children: [new TextRun(`Diterima Oleh : ${receivedBy}`)],
+                                spacing: { after: 100 },
+                            }),
+                            new Paragraph({
+                                children: [new TextRun(`Tanggal : ${dateFormatted}`)],
+                                spacing: { after: 300 },
+                            }),
+                            table,
+                            new Paragraph({ spacing: { before: 400 } }),
+                            new Paragraph({
+                                children: [new TextRun('Tanda Tangan', { size: 20, bold: true })],
+                                alignment: AlignmentType.CENTER,
+                                spacing: { after: 200 },
+                            }),
+                            new Table({
+                                rows: [
+                                    new TableRow({
+                                        children: [
+                                            new TableCell({
+                                                children: [
+                                                    new Paragraph({
+                                                        children: [new TextRun('Diserahkan Oleh')],
+                                                        alignment: AlignmentType.CENTER,
+                                                    }),
+                                                ],
+                                            }),
+                                            new TableCell({
+                                                children: [
+                                                    new Paragraph({
+                                                        children: [new TextRun('Diterima Oleh')],
+                                                        alignment: AlignmentType.CENTER,
+                                                    }),
+                                                ],
+                                            }),
+                                        ]
+                                    }),
+                                    new TableRow({
+                                        children: [
+                                            new TableCell({
+                                                children: [
+                                                    ...(givenSig ? [new Paragraph({
+                                                        children: [
+                                                            new ImageRun({
+                                                                data: givenSig.split(',')[1],
+                                                                transformation: { width: 150,
+                                                                    height: 50 },
+                                                                type: 'png',
+                                                            })
+                                                        ],
+                                                        alignment: AlignmentType.CENTER,
+                                                    })] : []),
+                                                    new Paragraph({
+                                                        children: [new TextRun(`Nama : ${givenBy}`)],
+                                                        spacing: { before: 100 },
+                                                    }),
+                                                    new Paragraph({
+                                                        children: [new TextRun(`Tgl : ${dateFormatted}`)],
+                                                    }),
+                                                ],
+                                                verticalAlign: docx.VerticalAlign.BOTTOM,
+                                            }),
+                                            new TableCell({
+                                                children: [
+                                                    ...(receivedSig ? [new Paragraph({
+                                                        children: [
+                                                            new ImageRun({
+                                                                data: receivedSig.split(',')[1],
+                                                                transformation: { width: 150,
+                                                                    height: 50 },
+                                                                type: 'png',
+                                                            })
+                                                        ],
+                                                        alignment: AlignmentType.CENTER,
+                                                    })] : []),
+                                                    new Paragraph({
+                                                        children: [new TextRun(`Nama : ${receivedBy}`)],
+                                                        spacing: { before: 100 },
+                                                    }),
+                                                    new Paragraph({
+                                                        children: [new TextRun(`Tgl : ${dateFormatted}`)],
+                                                    }),
+                                                ],
+                                                verticalAlign: docx.VerticalAlign.BOTTOM,
+                                            }),
+                                        ]
+                                    }),
+                                ],
+                                width: { size: 100, type: docx.WidthType.PERCENTAGE },
+                                borders: {
+                                    top: { style: BorderStyle.SINGLE, size: 1 },
+                                    bottom: { style: BorderStyle.SINGLE, size: 1 },
+                                    left: { style: BorderStyle.SINGLE, size: 1 },
+                                    right: { style: BorderStyle.SINGLE, size: 1 },
+                                    insideHorizontal: { style: BorderStyle.SINGLE, size: 1 },
+                                    insideVertical: { style: BorderStyle.SINGLE, size: 1 },
+                                },
+                            }),
+                        ],
+                    }],
+                });
+
+                const blob = await Packer.toBlob(doc);
+                saveAs(blob, `TandaTerima_${new Date().toISOString().slice(0,10)}.docx`);
+            } catch (err) {
+                console.error(err);
+                alert('Gagal generate DOCX: ' + err.message);
+            } finally {
+                wrapper.classList.remove('loading');
+            }
         }
 
         // ================================================================
-        // INIT
+        // VOICE INPUT (GLOBAL MIC)
         // ================================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('binus_theme');
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-                document.documentElement.style.colorScheme = savedTheme;
-            } else {
-                document.documentElement.style.colorScheme = 'dark';
+        (function setupVoiceInput() {
+            const micBtn = document.getElementById('global-mic-btn');
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                document.body.classList.add('no-speech-support');
+                return;
             }
 
-            const savedLang = localStorage.getItem('binus_lang');
-            if (savedLang) currentLang = savedLang;
+            let recognition = null;
+            let isListening = false;
+            let currentTarget = null;
 
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const themeLabel = currentTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
-            document.getElementById('theme-text').innerText = themeLabel;
-            document.getElementById('login-theme-text').innerText = themeLabel;
-            document.getElementById('lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
-            document.getElementById('login-lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
-
-            try {
-                const saved = localStorage.getItem('binus_current_session');
-                if (saved && saved !== "undefined") {
-                    const u = JSON.parse(saved);
-                    if (u && u.role) { applyRole(u); }
+            function getActiveField() {
+                const active = document.activeElement;
+                if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName ===
+                        'SELECT')) {
+                    return active;
                 }
-            } catch (e) { localStorage.removeItem('binus_current_session'); }
-        });
+                return null;
+            }
 
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const wrapper = document.getElementById('sig-given-wrapper');
-                if (wrapper) {
-                    const canvas = document.getElementById('sig-given');
-                    const rect = wrapper.getBoundingClientRect();
-                    if (canvas && Math.abs(canvas.width - rect.width * (window.devicePixelRatio || 1)) > 10) {
-                        initSignaturePads();
+            micBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const field = getActiveField();
+                if (!field) {
+                    alert('Klik dulu di field input yang mau diisi suara, baru tekan tombol mic.');
+                    return;
+                }
+
+                if (isListening) {
+                    stopListening();
+                    return;
+                }
+
+                currentTarget = field;
+                field.classList.add('voice-target');
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'id-ID';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = function() {
+                    isListening = true;
+                    micBtn.classList.add('mic-active');
+                    micBtn.innerHTML = '⏹️';
+                };
+
+                recognition.onresult = function(event) {
+                    const result = event.results[0][0].transcript.trim();
+                    if (currentTarget) {
+                        const mode = currentTarget.dataset.voiceMode || 'default';
+                        let finalText = result;
+                        if (mode === 'compact') {
+                            finalText = result.replace(/\s+/g, '').toUpperCase();
+                        } else if (mode === 'spaced') {
+                            finalText = result.replace(/\s+/g, ' ').toUpperCase();
+                        }
+                        currentTarget.value = finalText;
+                        currentTarget.dispatchEvent(new Event('input', { bubbles: true }));
+                        currentTarget.classList.remove('voice-target');
+                        currentTarget = null;
                     }
-                }
-            }, 300);
-        });
-    </script>
+                    stopListening();
+                };
 
+                recognition.onerror = function(event) {
+                    console.error('Speech error:', event.error);
+                    if (event.error === 'not-allowed') {
+                        alert('Izin mikrofon ditolak. Izinkan akses mikrofon di browser.');
+                    } else if (event.error !== 'aborted') {
+                        alert('Gagal menangkap suara: ' + event.error);
+                    }
+                    stopListening();
+                };
+
+                recognition.onend = function() {
+                    stopListening();
+                };
+
+                recognition.start();
+            });
+
+            function stopListening() {
+                if (recognition) {
+                    try { recognition.abort(); } catch (e) {}
+                    recognition = null;
+                }
+                isListening = false;
+                micBtn.classList.remove('mic-active');
+                micBtn.innerHTML = '🎤';
+                if (currentTarget) {
+                    currentTarget.classList.remove('voice-target');
+                    currentTarget = null;
+                }
+            }
+
+            // Cleanup jika user klik di luar
+            document.addEventListener('click', function(e) {
+                if (isListening && !e.target.closest('#global-mic-btn')) {
+                    // Jangan stop otomatis, biarkan user selesai bicara.
+                }
+            });
+        })();
+
+        // ================================================================
+        // SET DEFAULT DATE
+        // ================================================================
+        (function setDefaultDate() {
+            const dateInput = document.getElementById('receipt-date');
+            if (dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+        })();
+
+        console.log('✅ Binus Alsut Receipt - Default item rows = 1');
+    </script>
 </body>
 </html>
