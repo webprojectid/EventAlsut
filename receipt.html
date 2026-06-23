@@ -817,7 +817,6 @@
         }
         .item-row .item-remove {
             flex: 0 0 auto;
-            padding: 0.35rem 0.6rem;
         }
 
         /* Highlight field yang lagi jadi target voice input */
@@ -874,45 +873,60 @@
         /* ============================================================ */
         @media (max-width: 768px) {
             .item-row {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 0.6rem;
-                padding: 1rem;
-                overflow-x: hidden;
+                /* Container luar diubah jadi flex vertical tanpa background/border */
+                display: flex !important;
+                flex-direction: column;
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                gap: 0.5rem;
+                box-shadow: none !important;
             }
             
-            .item-row > * {
+            /* Pindahkan Card Layout (border & background) ke wrapper input ini */
+            .item-inputs-wrapper {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.85rem;
+                padding: 1.25rem;
+                background: var(--brand-surface);
+                border: 1px solid var(--brand-border);
+                border-radius: 0.75rem;
+            }
+            
+            .item-inputs-wrapper > * {
                 flex: none !important;
                 width: 100%;
                 min-width: 0 !important;
                 max-width: none !important;
             }
             
-            .item-row .item-name { grid-column: 1 / -1; }
-            .item-row .item-spec { grid-column: 1 / -1; }
+            .item-inputs-wrapper .item-name { grid-column: 1 / -1; }
+            .item-inputs-wrapper .item-spec { grid-column: 1 / -1; }
             
-            .item-row .item-qty { grid-column: 1 / 2; }
-            .item-row .item-fa { grid-column: 2 / 3; }
+            .item-inputs-wrapper .item-qty { grid-column: 1 / 2; }
+            .item-inputs-wrapper .item-fa { grid-column: 2 / 3; }
             
-            .item-row .item-sn { grid-column: 1 / -1; }
+            .item-inputs-wrapper .item-sn { grid-column: 1 / -1; }
             
-            .item-row .item-kondisi { grid-column: 1 / 2; }
-            .item-row .item-status { grid-column: 2 / 3; }
+            .item-inputs-wrapper .item-kondisi { grid-column: 1 / 2; }
+            .item-inputs-wrapper .item-status { grid-column: 2 / 3; }
             
+            /* Tombol hapus sekarang ada di LUAR card dan rata kiri bawah */
             .item-row .item-remove {
-                grid-column: 1 / -1;
-                margin-top: 0.5rem;
-                padding: 0.6rem;
-                background-color: rgba(244, 63, 94, 0.08);
-                border: 1px solid var(--status-danger-border);
-                color: var(--status-danger-text);
-                font-weight: 700;
-                border-radius: 0.5rem;
-                text-align: center;
+                align-self: flex-start;
+                padding: 0.25rem 0.75rem !important;
+                background-color: var(--form-bg) !important;
+                border: 1px solid var(--status-danger-border) !important;
+                color: var(--status-danger-text) !important;
+                font-weight: 700 !important;
+                font-size: 0.65rem !important;
+                border-radius: 0.5rem !important;
+                width: auto !important;
                 transition: all 0.2s ease;
             }
             .item-row .item-remove:hover {
-                background-color: rgba(244, 63, 94, 0.15);
+                background-color: var(--status-danger-bg) !important;
             }
         }
 
@@ -965,12 +979,21 @@
                 <button type="submit" class="w-full py-3.5 mt-2 rounded-xl btn-primary text-white font-bold tracking-wide shadow-lg transition hover:opacity-90">
                     Sign In
                 </button>
-                <div class="flex items-center justify-center space-x-3 pt-3">
-                    <button type="button" onclick="toggleTheme()" class="px-4 py-2 rounded-xl bg-brand-surface border border-brand-border text-xs font-bold text-brand-text transition hover:bg-brand-glow shadow-sm">
-                        <span id="login-theme-text">Dark</span>
+                
+                <!-- NEW TOGGLE SWITCHES -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 pb-2">
+                    <!-- Theme Toggle -->
+                    <button type="button" onclick="toggleTheme()" class="relative flex items-center justify-between w-[160px] h-7 bg-brand-surface border border-brand-border rounded-full p-1 cursor-pointer shadow-sm overflow-hidden flex-shrink-0">
+                        <div class="theme-slider absolute left-1 top-1 w-[76px] h-5 bg-brand-primary rounded-full transition-transform duration-300 ease-out"></div>
+                        <span class="theme-txt-light relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Light Mode</span>
+                        <span class="theme-txt-dark relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Dark Mode</span>
                     </button>
-                    <button type="button" onclick="toggleLanguage()" class="px-4 py-2 rounded-xl bg-brand-surface border border-brand-border text-xs font-bold text-brand-text transition hover:bg-brand-glow shadow-sm">
-                        <span id="login-lang-text">ENG</span>
+
+                    <!-- Lang Toggle -->
+                    <button type="button" onclick="toggleLanguage()" class="relative flex items-center justify-between w-[150px] h-7 bg-brand-surface border border-brand-border rounded-full p-1 cursor-pointer shadow-sm overflow-hidden flex-shrink-0">
+                        <div class="lang-slider absolute left-1 top-1 w-[71px] h-5 bg-blue-600 rounded-full transition-transform duration-300 ease-out"></div>
+                        <span class="lang-txt-id relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Indonesia</span>
+                        <span class="lang-txt-en relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Inggris (US)</span>
                     </button>
                 </div>
             </form>
@@ -1007,17 +1030,25 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 flex-shrink-0 border-t border-brand-border md:border-0 pt-2 md:pt-0 mt-1 md:mt-0">
+                <div class="flex flex-wrap items-center justify-end gap-2 flex-shrink-0 border-t border-brand-border md:border-0 pt-2 md:pt-0 mt-1 md:mt-0">
                     <span class="live-badge hidden md:inline-flex mr-2"><span class="live-dot"></span><span class="live-text">LIVE</span></span>
                     <span class="text-xs font-bold text-brand-text hidden lg:inline-block mr-2 truncate max-w-[100px]" id="user-display-name">User</span>
 
-                    <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-brand-border bg-brand-surface text-brand-text hover:bg-brand-glow transition shadow-sm">
-                        <span id="theme-text">Dark</span>
+                    <!-- Theme Toggle -->
+                    <button type="button" onclick="toggleTheme()" class="relative flex items-center justify-between w-[160px] h-7 bg-brand-surface border border-brand-border rounded-full p-1 cursor-pointer shadow-sm overflow-hidden flex-shrink-0">
+                        <div class="theme-slider absolute left-1 top-1 w-[76px] h-5 bg-brand-primary rounded-full transition-transform duration-300 ease-out"></div>
+                        <span class="theme-txt-light relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Light Mode</span>
+                        <span class="theme-txt-dark relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Dark Mode</span>
                     </button>
-                    <button onclick="toggleLanguage()" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-brand-border bg-brand-surface text-brand-text hover:bg-brand-glow transition shadow-sm">
-                        <span id="lang-text">ENG</span>
+
+                    <!-- Lang Toggle -->
+                    <button type="button" onclick="toggleLanguage()" class="relative flex items-center justify-between w-[150px] h-7 bg-brand-surface border border-brand-border rounded-full p-1 cursor-pointer shadow-sm overflow-hidden flex-shrink-0">
+                        <div class="lang-slider absolute left-1 top-1 w-[71px] h-5 bg-blue-600 rounded-full transition-transform duration-300 ease-out"></div>
+                        <span class="lang-txt-id relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Indonesia</span>
+                        <span class="lang-txt-en relative z-10 w-1/2 text-center text-[9px] font-bold transition-colors duration-300 truncate">Inggris (US)</span>
                     </button>
-                    <button onclick="handleLogout()" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-status-danger-border bg-status-danger-bg text-status-danger-text hover:opacity-80 transition shadow-sm flex items-center">
+
+                    <button onclick="handleLogout()" class="px-3 py-1 text-xs font-bold rounded-full border border-status-danger-border bg-status-danger-bg text-status-danger-text hover:opacity-80 transition shadow-sm flex items-center h-7">
                         <span class="hidden sm:inline-block mr-1">Logout</span> ⤴
                     </button>
                 </div>
@@ -1105,7 +1136,7 @@
                                     </div>
 
                                 </div>
-                                <div id="items-container" class="space-y-1.5 max-h-[300px] overflow-y-auto no-scrollbar pr-1"></div>
+                                <div id="items-container" class="space-y-2.5 max-h-[500px] overflow-y-auto no-scrollbar pr-1"></div>
                             </div>
 
                             <!-- ===== SIGNATURE PADS — DIPINDAHKAN KE BAWAH (SETELAH ITEMS) ===== -->
@@ -1270,26 +1301,46 @@
             window.location.href = 'index.html';
         }
 
+        function updateTogglesUI() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const isEn = currentLang === 'en';
+
+            // Update Semua Theme Toggle (Login & Header)
+            document.querySelectorAll('.theme-slider').forEach(el => {
+                el.style.transform = isDark ? 'translateX(100%)' : 'translateX(0)';
+            });
+            document.querySelectorAll('.theme-txt-light').forEach(el => {
+                el.style.color = isDark ? 'var(--brand-muted)' : '#FFFFFF';
+            });
+            document.querySelectorAll('.theme-txt-dark').forEach(el => {
+                el.style.color = isDark ? '#FFFFFF' : 'var(--brand-muted)';
+            });
+
+            // Update Semua Lang Toggle (Login & Header)
+            document.querySelectorAll('.lang-slider').forEach(el => {
+                el.style.transform = isEn ? 'translateX(100%)' : 'translateX(0)';
+            });
+            document.querySelectorAll('.lang-txt-id').forEach(el => {
+                el.style.color = isEn ? 'var(--brand-muted)' : '#FFFFFF';
+            });
+            document.querySelectorAll('.lang-txt-en').forEach(el => {
+                el.style.color = isEn ? '#FFFFFF' : 'var(--brand-muted)';
+            });
+        }
+
         function toggleTheme() {
             const html = document.documentElement;
             const newTheme = (html.getAttribute('data-theme') || 'light') === 'light' ? 'dark' : 'light';
             html.setAttribute('data-theme', newTheme);
             html.style.colorScheme = newTheme;
-            const themeLabel = newTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
-            document.getElementById('theme-text').innerText = themeLabel;
-            document.getElementById('login-theme-text').innerText = themeLabel;
             localStorage.setItem('binus_theme', newTheme);
+            updateTogglesUI();
         }
 
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'id' : 'en';
-            document.getElementById('lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
-            document.getElementById('login-lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const themeLabel = currentTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
-            document.getElementById('theme-text').innerText = themeLabel;
-            document.getElementById('login-theme-text').innerText = themeLabel;
             localStorage.setItem('binus_lang', currentLang);
+            updateTogglesUI();
         }
 
         // ================================================================
@@ -1762,15 +1813,18 @@
                 `<option value="${k.value}" ${data && data.kondisi === k.value ? 'selected' : ''}>${k.label}</option>`
             ).join('');
 
+            // BUNGKUS INPUT DI DIV TERSENDIRI AGAR BISA DIPISAH DARI TOMBOL
             div.innerHTML = `
-                <input type="text" class="item-name input-modern text-brand-text text-xs" data-voice-mode="spaced" placeholder="Nama Barang" value="${data?.name || ''}" />
-                <input type="text" class="item-spec input-modern text-brand-text text-xs" data-voice-mode="spaced" placeholder="Spesifikasi" value="${data?.spec || ''}" />
-                <input type="number" class="item-qty input-modern text-brand-text text-xs text-center" placeholder="Qty" value="${data?.qty || 1}" min="1" />
-                <input type="text" class="item-fa input-modern text-brand-text text-xs" data-voice-mode="compact" placeholder="FA" value="${data?.fa || ''}" />
-                <input type="text" class="item-sn input-modern text-brand-text text-xs" data-voice-mode="compact" placeholder="S/N" value="${data?.sn || ''}" />
-                <select class="item-kondisi input-modern text-brand-text text-xs">${kondisiOpts}</select>
-                <select class="item-status input-modern text-brand-text text-xs">${statusOpts}</select>
-                <button type="button" onclick="removeItemRow('${rowId}')" class="item-remove p-1.5 text-brand-muted hover:text-status-danger-text rounded-lg bg-brand-surface border border-brand-border hover:border-status-danger-text transition text-xs">✕</button>
+                <div class="item-inputs-wrapper" style="display: contents;">
+                    <input type="text" class="item-name input-modern text-brand-text text-xs" data-voice-mode="spaced" placeholder="Nama Barang" value="${data?.name || ''}" />
+                    <input type="text" class="item-spec input-modern text-brand-text text-xs" data-voice-mode="spaced" placeholder="Spesifikasi" value="${data?.spec || ''}" />
+                    <input type="number" class="item-qty input-modern text-brand-text text-xs text-center" placeholder="Qty" value="${data?.qty || 1}" min="1" />
+                    <input type="text" class="item-fa input-modern text-brand-text text-xs" data-voice-mode="compact" placeholder="FA" value="${data?.fa || ''}" />
+                    <input type="text" class="item-sn input-modern text-brand-text text-xs" data-voice-mode="compact" placeholder="S/N" value="${data?.sn || ''}" />
+                    <select class="item-kondisi input-modern text-brand-text text-xs">${kondisiOpts}</select>
+                    <select class="item-status input-modern text-brand-text text-xs">${statusOpts}</select>
+                </div>
+                <button type="button" onclick="removeItemRow('${rowId}')" class="item-remove px-3 py-1.5 text-status-danger-text bg-transparent border border-status-danger-border hover:bg-status-danger-bg rounded-lg font-bold transition text-xs flex-shrink-0">✕ Hapus</button>
             `;
             container.appendChild(div);
         }
@@ -2347,12 +2401,8 @@
             const savedLang = localStorage.getItem('binus_lang');
             if (savedLang) currentLang = savedLang;
 
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const themeLabel = currentTheme === 'dark' ? tk('theme_dark') : tk('theme_light');
-            document.getElementById('theme-text').innerText = themeLabel;
-            document.getElementById('login-theme-text').innerText = themeLabel;
-            document.getElementById('lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
-            document.getElementById('login-lang-text').innerText = currentLang === 'en' ? 'ENG' : 'ID';
+            // Panggil update UI untuk Toggle Buttons
+            updateTogglesUI();
 
             try {
                 const saved = localStorage.getItem('binus_current_session');
